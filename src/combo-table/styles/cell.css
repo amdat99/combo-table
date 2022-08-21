@@ -1,0 +1,59 @@
+.combo-table-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  font-size: 14px;
+  color: #333;
+  padding-top: 9px;
+  background-color: transparent;
+}
+
+.combo-table-textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  font-size: 14px;
+  color: #333;
+  padding-top: 9px;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.combo-table-input:focus {
+  border-bottom: 2px dotted #eee;
+}
+
+.combo-table-input-error {
+  border-bottom: 2px dotted #f00 !important;
+}
+
+.combo-table-select {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  font-size: 14px;
+  color: #333;
+  padding-top: 9px;
+  background-color: transparent;
+}
+
+.combo-table-validation-box {
+  z-index: 1000;
+
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.779);
+  backdrop-filter: blur(100px);
+  box-shadow: blur(10px) 0px 0px 10px rgba(0, 0, 0, 0.5);
+  color: red;
+}
+
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+}
