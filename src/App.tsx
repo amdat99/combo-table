@@ -1,25 +1,24 @@
 import React from "react";
-import ComboTable, { Transformer, Column, CellChangeEvent } from "./combo-table";
 import "./App.css";
+import ComboTable, { Column, CellChangeEvent, Transformer, SelectionData } from "./combo-table";
+import requestsService from "./requests.service";
 
 function App() {
   const [data, setData] = React.useState<any>([]);
   const [loading, setLoading] = React.useState(false);
   const columns: Column[] = [
+    { key: "checkbox", label: "", type: "checkbox" },
     {
-      key: "",
+      key: "pic",
       label: "Profile pic",
       cellTransformer: (data: Transformer) => {
         return (
           <div>
-            <img
-              loading="lazy"
-              alt="profile"
-              width="30"
-              height="30"
-              style={{ borderRadius: "50%" }}
-              src={`https://picsum.photos/id/${data.row.id}/200/300`}
-            />
+            {data.row.id < 1000 ? (
+              <img alt="profile" width="22" height="22" style={{ borderRadius: "50%" }} src={`https://picsum.photos/id/${data.row.id}/200/300`} />
+            ) : (
+              <span>No image found</span>
+            )}
           </div>
         );
       },
@@ -31,28 +30,26 @@ function App() {
         color: data.cell === 2 ? "red" : "black",
       }),
     },
-    { key: "title", label: "Title", type: "input", minLength: 2, maxLength: 70 },
-    { key: "url", label: "Url", type: "textarea", columnStyle: { width: "40%" }, minLength: 2, maxLength: 700 },
+    { key: "title", label: "Title", minLength: 2, maxLength: 700, type: "input", columnStyle: { maxWidth: "200px" } },
+    { key: "url", label: "Url", minLength: 2, maxLength: 250, type: "input", subType: "url" },
     {
-      key: "",
+      key: "key",
       label: "select",
+      columnStyle: { width: "20%" },
       type: "select",
       options: [
-        { label: "option1", value: "1" },
-        { label: "option2", value: "2" },
+        { label: "Option1", value: "Option1", color: "green" },
+        { label: "Option2", value: "Option2", color: "red" },
       ],
+      multiple: true,
     },
+
     {
-      key: "",
-      label: "Email",
-      type: "input",
-      subType: "email",
-    },
-    {
-      key: "",
+      key: "date",
       label: "Date",
-      type: "input",
-      subType: "date",
+      type: "date",
+      columnStyle: { minWidth: "200px" },
+      dateType: "date",
     },
   ];
 
@@ -62,32 +59,38 @@ function App() {
 
   const fetchData = async () => {
     setLoading(true);
-    const response = await fetch("https://jsonplaceholder.typicode.com/photos");
-    const data = await response.json();
-    setData(data);
-    setTimeout(() => setLoading(false), 1000);
+    const fetchCb = (res: any) => {
+      setLoading(false);
+      setData(res);
+    };
+    requestsService.fetchData("https://jsonplaceholder.typicode.com/photos", fetchCb);
   };
 
   const setCell = (changeData: CellChangeEvent) => {
-    if (changeData.maxLengthError || changeData.minLengthError) {
-      console.log(changeData.maxLengthError, changeData.minLengthError);
-    }
     console.log(changeData);
-    data[changeData.rowIndex][changeData.cellKey] = changeData.event.target.value;
+    if (changeData.hasError) {
+      return console.log(changeData);
+    }
+    data[changeData.rowIndex][changeData.cellKey] = changeData.value;
   };
 
   return (
     <div className="App" style={{ display: "flex", justifyContent: "center", margin: "50px" }}>
       <ComboTable
-        rowAction={(data) => console.log("row", data)}
-        cellAction={(data) => console.log("cellAction", data)}
+        // rowAction={(data) => console.log("row", data)}
+        // cellAction={(data) => console.log("cellAction", data)}
         cellChangeEvent={setCell}
         rows={data}
         columns={columns}
-        maxHeight="90vh"
+        maxHeight="95vh"
         loading={loading}
-        visibleRows={70}
-        virtualization={true}
+        virtualizationOptions={{ enable: true, renderedRows: 90 }}
+        selectionOptions={{
+          rowActionSelects: false,
+          cellActionSelects: false,
+          getSelections: (data: SelectionData) => console.log("getSelections", data),
+        }}
+        formOptions={{ showForm: true, showOpenFormHandle: true, formView: "side" }}
       ></ComboTable>
     </div>
   );

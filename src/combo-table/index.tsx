@@ -1,16 +1,174 @@
-import React from "react";
-import { useInView } from "react-intersection-observer";
+import React, { useEffect, useState } from "react";
+import Table from "./views/Table";
+import Form from "./components/form";
+import Dropdown from "./components/shared/select/Dropdown";
 
-import CellContent from "./components/CellContent";
+import tableService from "./services/table.service";
+import useOnClickOutside from "./hooks/useOnClickOutside";
+import { utils } from "./utils";
+
+import "./styles/variables.css";
 import "./styles/table.css";
+import "./styles/select.css";
+
+type Props = {
+  columns: Column[];
+  rows: any[];
+  type?: "table" | "board" | "list" | "card";
+  loading?: boolean;
+  maxHeight?: string;
+  maxWidth?: string;
+  setType?: (type: string) => void;
+  rowAction?: (rowData: RowAction) => void;
+  cellAction?: (cellData: CellAction) => void;
+  cellChangeEvent?: (data: CellChangeEvent) => void;
+  noDataComponent?: React.ReactNode;
+  customLoaderComponent?: React.ReactNode;
+  dynamicCellHeight?: boolean;
+  virtualizationOptions?: VirtualizationOptions;
+  selectionOptions?: SelectionOptions;
+  formOptions?: FormOptions;
+  customFooterComponent?: ((data: FooterData) => React.ReactNode) | null;
+};
+
+export const DropDownContext = React.createContext<any>(null);
+
+const ComboTable = (props: Props) => {
+  const [currentRows, setCurrentRows] = useState<any>([]);
+  const [optionsMap] = useState<any>({});
+  const [currentType, setCurrentType] = useState(props.type);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedRows, setSelectedRows] = useState<any>([]);
+  const [selectedRowLength, setSelectedRowLength] = useState(0);
+  const [selectedCells, setSelectedCells] = useState<any>([]);
+  const [selectedCellRowIds, setSelectedCellRowIds] = useState<any>([]);
+  const [selectedRowIds, setSelectedRowIds] = useState<any>([]);
+  const [dropdownData, setDropdownData] = useState<any>({});
+  const value = React.useMemo(() => ({ dropdownData, setDropdownData, optionsMap }), [dropdownData, optionsMap]);
+
+  const formRef = React.useRef(null);
+  const selectRef = React.useRef<HTMLDivElement>(null);
+  //Hook to detect click outside of the sleect dropdown
+
+  useOnClickOutside(selectRef, () => setDropdownData({}));
+
+  //Hook to detect click outside of the form component
+  useOnClickOutside(formRef, () => setShowForm(false));
+
+  const { rows, type, selectionOptions, loading, customLoaderComponent, maxHeight, maxWidth, columns } = props;
+
+  useEffect(() => {
+    OnSetCurrentRows();
+  }, [rows]);
+
+  const OnSetCurrentRows = React.useCallback(() => {
+    setCurrentRows([...rows]);
+  }, [rows]);
+
+  //If column is select converts the options array into an object with the value as the key and hte column label as
+  useEffect(() => {
+    if (columns.length > 0) {
+      columns.forEach((column) => {
+        if (column.hasOwnProperty("options")) optionsMap[column.key] = utils.objectify(utils.fieldMap(column.options));
+      });
+    }
+  }, [columns]);
+
+  useEffect(() => {
+    if (currentType !== type) {
+      setCurrentType(type);
+    }
+  }, [type]);
+
+  //Handles the selection of checkbox select and row on clcik if selectionOptions.rowactionSelects is true
+  const onSelectRows = (row: any, rowIndex: number, bulk = false, checkbox = false) => {
+    tableService.selectRows(
+      row,
+      rowIndex,
+      bulk,
+      checkbox,
+      setSelectedRows,
+      selectedRows,
+      setSelectedRowIds,
+      selectionOptions,
+      selectedCells,
+      selectedRowIds,
+      selectedCellRowIds,
+      setSelectedRowLength
+    );
+    setSelectedRowLength(selectedRows.length);
+  };
+
+  const onSelectCells = (cell: any, cellIndex: number, row: any, bulk = false) => {
+    if (!bulk) {
+      setSelectedCells([]);
+      setSelectedCellRowIds([]);
+    }
+    selectedCells.push(cell);
+    selectedCellRowIds.push(cellIndex + "_" + row.id);
+  };
+
+  return (
+    <>
+      {showForm && <Form formRef={formRef} />}
+      {dropdownData?.options && <Dropdown dropdownData={dropdownData} optionsMap={optionsMap} selectRef={selectRef} />}
+      <DropDownContext.Provider value={value}>
+        <div
+          className="combo-table-table-wrapper combo-table-table-shadow combo-table-hide-scrollbar"
+          style={{ height: maxHeight || "100%", maxWidth: maxWidth || "100%" }}
+        >
+          {loading && (customLoaderComponent || <span className="combo-table-loader"></span>)}
+          {type === "table" && (
+            <Table
+              {...props}
+              onSelectRows={onSelectRows}
+              onSelectCells={onSelectCells}
+              currentRows={currentRows}
+              selectedRowLength={selectedRowLength}
+              selectedRowIds={selectedRowIds}
+              selectedCellRowIds={selectedCellRowIds}
+              selectedCells={selectedCells}
+              selectedRows={selectedRows}
+              setShowForm={setShowForm}
+              setCurrentRows={OnSetCurrentRows}
+            />
+          )}
+        </div>
+      </DropDownContext.Provider>
+    </>
+  );
+};
+
+export default ComboTable;
+
+ComboTable.defaultProps = {
+  type: "table",
+  loading: false,
+  maxHeight: "100%",
+  maxWidth: "100%",
+  dynamicCellHeight: false,
+  virtualizationOptions: { renderedRows: 50, enable: false },
+  selectionOptions: { rowActionSelects: false, cellActionSelects: false },
+  formOptions: { showForm: false, showOpenFormHandle: false, formView: "side" },
+  customFooterComponent: null,
+  columns: [],
+  rows: [],
+  setType: () => {},
+  rowAction: () => {},
+  cellAction: () => {},
+  cellChangeEvent: () => {},
+  noDataComponent: null,
+};
 
 export type Column = {
-  id?: string;
+  id?: string | number;
   key: string;
   label: string;
   type?: string;
-  subType?: string;
-  options?: { value: any; label: string }[];
+  multiple?: boolean;
+  subType?: "number" | "email" | "password" | "tel" | "url" | "char" | "decimal";
+  dateType?: "date" | "time" | "datetime-local" | "month" | "week" | "datetime";
+  options?: { value: any; label: string; color?: string; action?: Function }[];
   columnClass?: string;
   headerClass?: string;
   columnStyle?: React.CSSProperties;
@@ -21,6 +179,8 @@ export type Column = {
   cellTransformer?: (value: Transformer) => any;
   minLength?: number;
   maxLength?: number;
+  extraProps?: any;
+  disableCheckBox?: boolean;
 };
 
 export type RowAction = {
@@ -51,8 +211,9 @@ export type Transformer = {
 };
 
 export type CellChangeEvent = {
-  event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement>;
-  cell: any;
+  event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement> | React.MouseEvent;
+  prevValue: any;
+  value: any;
   row: any;
   cellKey: string;
   cellIndex: number;
@@ -60,223 +221,35 @@ export type CellChangeEvent = {
   minLengthError?: string;
   maxLengthError?: string;
   patternError?: string;
+  textarea?: boolean;
+  text?: boolean;
+  hasError?: boolean;
+  option?: any;
+  multiple?: boolean;
+  cb?: any;
 };
 
-type Props = {
-  columns: Column[];
-  rows: any[];
-  type?: "table" | "board" | "list" | "card";
-  loading?: boolean;
-  maxHeight?: string;
-  maxWidth?: string;
-  setType?: (type: string) => void;
-  rowAction?: (rowData: RowAction) => void;
-  cellAction?: (cellData: CellAction) => void;
-  cellChangeEvent?: (data: CellChangeEvent) => void;
-  noDataComponent?: React.ReactNode;
-  customLoaderComponent?: React.ReactNode;
-  visibleRows?: number;
-  virtualization?: boolean;
+export type SelectionOptions = {
+  rowActionSelects?: boolean;
+  cellActionSelects?: boolean;
+  getSelections?: (data: SelectionData) => void;
 };
 
-const ComboTable = ({
-  columns = [],
-  rows = [],
-  rowAction = () => {},
-  cellAction = () => {},
-  loading = false,
-  customLoaderComponent = null,
-  noDataComponent = null,
-  type = "table",
-  maxHeight = "",
-  maxWidth = "",
-  cellChangeEvent = () => {},
-  visibleRows = 60,
-  virtualization = false,
-}: Props) => {
-  const [currentRows, setCurrentRows] = React.useState<any>([]);
-  const [currentType, setCurrentType] = React.useState(type);
-  const [selectedRows, setSelectedRows] = React.useState<any>([]);
-  const [selectedCells, setSelectedCells] = React.useState<any>([]);
-  const [selectedCellIndexes, setSelectedCellIndexes] = React.useState<any>([]);
-  const [selectedRowIndexes, setSelectedRowIndexes] = React.useState<any>([]);
-  const [virtualRange, setVirtualRange] = React.useState({ lower: 0, upper: visibleRows * 2, currentId: 0 });
-
-  React.useEffect(() => {
-    OnSetCurrentRows();
-  }, [rows]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const OnSetCurrentRows = React.useCallback(() => {
-    setCurrentRows([...rows]);
-    console.log("OnSetCurrentRows", currentRows);
-  }, [rows]);
-
-  React.useEffect(() => {
-    if (currentType !== type) {
-      setCurrentType(type);
-    }
-  }, [type]);
-
-  const onSelectRows = (row: any, rowIndex: number, bulk = false) => {
-    if (!bulk) {
-      setSelectedRows([]);
-      setSelectedRowIndexes([]);
-    }
-    selectedRows.push(row);
-    setSelectedRowIndexes([...selectedRowIndexes, rowIndex]);
-    console.log("selectedRowsu", selectedRowIndexes);
-  };
-
-  const onSelectCells = (cell: any, cellIndex: number, bulk = false) => {
-    if (!bulk) {
-      setSelectedCells([]);
-      setSelectedCellIndexes([]);
-    }
-    selectedCells.push(cell);
-    setSelectedCellIndexes([...selectedCellIndexes, cellIndex]);
-  };
-
-  return (
-    <div className="combo-table-table-wrapper hide-scroll " style={{ maxHeight: maxHeight || "100%", maxWidth: maxWidth || "100%" }}>
-      <table className="combo-table-table ">
-        {columns.length > 0 && (
-          <thead className="combo-table-header" style={{ maxWidth: maxWidth || "100%" }}>
-            <tr>
-              {columns.map((column, i) => (
-                <th className={"combo-table-header-content " + column.columnClass} style={column.columnStyle} key={column.id || i}>
-                  {column.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-        )}
-        {loading && <div>{customLoaderComponent || "Loading..."}</div>}
-        <tbody>
-          {currentRows && currentRows.length > 0
-            ? currentRows.map((row: { [x: string]: any }, rowIndex: number) => {
-                return (
-                  //@ts-ignore
-                  <TableRow
-                    row={row}
-                    rowIndex={rowIndex}
-                    virtualRange={virtualRange}
-                    onSelectRows={onSelectRows}
-                    rowAction={rowAction}
-                    cellAction={cellAction}
-                    cellChangeEvent={cellChangeEvent}
-                    selectedRows={selectedRows}
-                    selectedCells={selectedCells}
-                    selectedCellIndexes={selectedCellIndexes}
-                    selectedRowIndexes={selectedRowIndexes}
-                    key={rowIndex}
-                    columns={columns}
-                    currentRows={currentRows}
-                    visibleRows={visibleRows}
-                    onSelectCells={onSelectCells}
-                    setVirtualRange={setVirtualRange}
-                    setCurrentRows={setCurrentRows}
-                    virtualization={virtualization}
-                  />
-                );
-              })
-            : noDataComponent && !loading
-            ? noDataComponent
-            : !loading && (
-                <tr>
-                  <td>No data</td>
-                </tr>
-              )}
-        </tbody>
-      </table>
-    </div>
-  );
+export type SelectionData = {
+  selectedRows: any[];
+  selectedCells: any[];
+  selectedRowIds: string | number[];
+  selectedCellRowIds: string | number[];
 };
 
-const TableRow = ({
-  rowIndex,
-  virtualRange,
-  onSelectRows,
-  rowAction,
-  visibleRows,
-  selectedRows,
-  selectedCells,
-  row,
-  selectedRowIndexes,
-  columns,
-  cellAction,
-  onSelectCells,
-  currentRows,
-  cellChangeEvent,
-  setCurrentRows,
-  setVirtualRange,
-  virtualization,
-}: any) => {
-  const { ref, inView } = useInView();
-  let shouldRender = virtualization ? rowIndex >= virtualRange.lower && rowIndex < virtualRange.upper : true;
-  const viewCondition = (rowIndex + 2) % visibleRows === 0;
-  React.useEffect(() => {
-    if (inView) {
-      if (rowIndex + visibleRows + 2 !== virtualRange.upper) {
-        setVirtualRange({ lower: rowIndex - visibleRows, upper: rowIndex + visibleRows + 2, currentId: row.id });
-        console.log("setVirtualRange", rowIndex, virtualRange);
-      }
-    }
-  }, [inView]);
-
-  return (
-    <>
-      {shouldRender ? (
-        <tr
-          onClick={(event: React.MouseEvent) => {
-            onSelectRows(row, rowIndex);
-            setTimeout(() => {
-              rowAction({ row, event, selectedRows, selectedCells, rowIndex });
-            }, 0);
-          }}
-          //@ts-ignore
-          ref={viewCondition && virtualization ? ref : null}
-          key={rowIndex}
-          style={{ backgroundColor: selectedRowIndexes.includes(rowIndex) ? "#f5f5f5;  " : "transparent" }}
-          className={"combo-table-row"}
-        >
-          {columns.map((column: Column, cellIndex: number) => (
-            <td
-              className="combo-table-cell"
-              key={column.id || cellIndex}
-              onClick={(event: React.MouseEvent) => {
-                onSelectCells(row[column.key], cellIndex);
-                setTimeout(() => {
-                  cellAction({
-                    cell: row[column.key],
-                    row,
-                    rowIndex,
-                    cellIndex,
-                    selectedRows,
-                    selectedCells,
-                    event,
-                    cellKey: column.key,
-                  });
-                }, 0);
-              }}
-            >
-              <CellContent
-                row={row}
-                column={column}
-                rowIndex={rowIndex}
-                cellIndex={cellIndex}
-                setCurrentRows={setCurrentRows}
-                currentRows={currentRows}
-                cellChangeEvent={cellChangeEvent}
-              />
-            </td>
-          ))}
-        </tr>
-      ) : (
-        <tr ref={viewCondition && virtualization ? ref : null} style={{ width: "100%", minHeight: "50px" }}>
-          <td style={{ opacity: 0 }}>test</td>
-        </tr>
-      )}
-    </>
-  );
+export type FooterData = {
+  selectedRows: any[];
+  selectedCells: any[];
+  selectedRowIds: string | number[];
+  selectedCellRowIds: string | number[];
+  selectedRowLength: number;
 };
-export default ComboTable;
+
+export type FormOptions = { showForm: boolean; showOpenFormHandle: boolean; formView: "side" | "modal" | "full" };
+
+export type VirtualizationOptions = { renderedRows: number; enable: boolean };
