@@ -1,5 +1,5 @@
 .combo-table-input {
-  width: 98%;
+  width: 100%;
   border: none;
   outline: none;
   background-color: transparent;
@@ -9,7 +9,7 @@
 }
 
 .combo-table-textarea {
-  width: 98%;
+  width: 100%;
   outline: none;
   height: fit-content;
   background-color: transparent;

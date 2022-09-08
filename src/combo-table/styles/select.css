@@ -7,7 +7,7 @@
   min-width: 250px;
   height: fit-content;
   background: var(--combo-table-background);
-  box-shadow: blur(10px) 0px 5px 10px var(--combo-table-shadow);
+  box-shadow: 0px 5px 10px var(--combo-table-shadow);
   border: 2px solid var(--combo-table-border);
   border-radius: 5px !important;
   padding: 3px;
@@ -22,9 +22,10 @@
 }
 .combo-table-select-label {
   font-size: 13px;
-  color: var(--combo-table-text);
+  color: white;
   font-weight: normal;
-  border-radius: 4px !important;
+  opacity: 0.6;
+  border-radius: 5px !important;
   padding: 2px;
   margin: 2px;
   width: fit-content;
@@ -33,11 +34,11 @@
 }
 
 .combo-table-select-label:hover {
-  background-color: var(--combo-table-background-hover) !important;
+  opacity: 1;
 }
 
 .combo-table-options {
-  padding: 4px;
+  padding: 2px;
 }
 .combo-table-options:hover {
   background-color: var(--combo-table-background-hover) !important;

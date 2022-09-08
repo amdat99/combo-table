@@ -7,8 +7,8 @@
   border: 1px solid var(--combo-table-border);
   border-radius: 6px !important;
   padding: 1px;
-  box-shadow: 0 0 10px 0 var(--combo-table-shadow);
-  -webkit-box-shadow: 0 0 10px 0 var(--combo-table-shadow);
+  box-shadow: 0 0 0px 0 var(--combo-table-shadow);
+  -webkit-box-shadow: 0 0 6px 0 var(--combo-table-shadow);
   padding-top: 0px;
 }
 
@@ -16,7 +16,6 @@
   border-collapse: collapse;
   width: 100%;
   font-size: 13.5px;
-  border: 1px solid var(--combo-table-border);
 }
 
 .combo-table-header {
@@ -25,20 +24,36 @@
   vertical-align: middle;
   text-align: left;
   padding: 4px;
-  background: var(--combo-table-secondary);
+  background: var(--combo-table-background);
   color: var(--combo-table-text);
   backdrop-filter: blur(100px);
   border-radius: 9px;
+  border-bottom: 2px solid var(--combo-table-border);
   top: 0px;
+
   box-shadow: blur(10px) 0px 0px 10px var(--combo-table-shadow);
 }
 
 .combo-table-header th {
   font-weight: normal;
-
   padding: 5px;
 }
 
+.combo-table-toolbar {
+  height: 20px;
+  z-index: 999;
+  top: -10px !important;
+  vertical-align: middle;
+  text-align: left;
+  background-color: var(--combo-table-background);
+}
+.combo-table-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: var(--combo-table-text);
+  padding-top: 5px;
+  text-align: center;
+}
 .combo-table-row {
   border-bottom: 1px solid var(--combo-table-border);
   font-weight: normal;
@@ -53,12 +68,12 @@
 .combo-table-cell {
   border: 1px solid var(--combo-table-border);
   text-align: left;
-  padding: 6px;
+  padding: 8px;
   font-size: 13.5px;
 }
 
 .combo-table-table-check {
-  opacity: 0.75;
+  opacity: 0.5;
   cursor: pointer;
   position: relative;
   top: 9px;

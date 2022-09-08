@@ -12,11 +12,10 @@ const selectRows = (
   selectionOptions: undefined | { rowActionSelects?: boolean; cellActionSelects?: boolean; getSelections?: (data: SelectionData) => void },
   selectedCells: any[],
   selectedRowIds: any[],
-  selectedCellRowIds: string | number[],
-  setSelectedRowLength: (length: number) => void
+  selectedCellRowIds: string | number[]
 ) => {
   let currentselectedRows = selectedRows;
-  console.log("selectedRows", selectedRows);
+
   if (checkbox || selectionOptions?.rowActionSelects) {
     if (!bulk) {
       setSelectedRows([]);
@@ -36,6 +35,7 @@ const selectRows = (
       selectedRowIds.push(row.id);
     }
   }
+
   if (selectionOptions?.getSelections)
     selectionOptions.getSelections({
       selectedRows: selectedRows,
@@ -58,7 +58,6 @@ const onCellValidate = (val: CellChangeEvent, currentRows: any, rowIndex: number
         }
       });
     }
-    console.log("duplicate", duplicate);
     if (duplicate) {
       return val;
     }

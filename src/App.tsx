@@ -6,8 +6,9 @@ import requestsService from "./requests.service";
 function App() {
   const [data, setData] = React.useState<any>([]);
   const [loading, setLoading] = React.useState(false);
+  const [showForm, setShowForm] = React.useState(false);
   const columns: Column[] = [
-    { key: "checkbox", label: "", type: "checkbox" },
+    { key: "checkbox", label: "", type: "checkbox-select" },
     {
       key: "pic",
       label: "Profile pic",
@@ -30,16 +31,16 @@ function App() {
         color: data.cell === 2 ? "red" : "black",
       }),
     },
-    { key: "title", label: "Title", minLength: 2, maxLength: 700, type: "input", columnStyle: { maxWidth: "200px" } },
+    { key: "title", label: "Title", minLength: 2, maxLength: 200, type: "input", columnStyle: { maxWidth: "200px" } },
     { key: "url", label: "Url", minLength: 2, maxLength: 250, type: "input", subType: "url" },
     {
-      key: "key",
+      key: "select",
       label: "select",
       columnStyle: { width: "20%" },
       type: "select",
       options: [
-        { label: "Option1", value: "Option1", color: "green" },
-        { label: "Option2", value: "Option2", color: "red" },
+        { label: "Option1", value: "Option1", color: "blue" },
+        { label: "Option2", value: "Option2", color: "pink" },
       ],
       multiple: true,
     },
@@ -53,8 +54,11 @@ function App() {
     },
   ];
 
+  let timeout: any = null;
+
   React.useEffect(() => {
     fetchData();
+    // window.addEventListener("beforeunload", () => requestsService.setTable(data, "photos"));
   }, []);
 
   const fetchData = async () => {
@@ -63,36 +67,43 @@ function App() {
       setLoading(false);
       setData(res);
     };
-    requestsService.fetchData("https://jsonplaceholder.typicode.com/photos", fetchCb);
+    requestsService.fetchData("photos", fetchCb);
   };
 
   const setCell = (changeData: CellChangeEvent) => {
-    console.log(changeData);
     if (changeData.hasError) {
       return console.log(changeData);
     }
     data[changeData.rowIndex][changeData.cellKey] = changeData.value;
+
+    timeout = setTimeout(() => {
+      requestsService.setTable(data, "photos");
+      clearTimeout(timeout);
+    }, 10000);
   };
 
   return (
-    <div className="App" style={{ display: "flex", justifyContent: "center", margin: "50px" }}>
-      <ComboTable
-        // rowAction={(data) => console.log("row", data)}
-        // cellAction={(data) => console.log("cellAction", data)}
-        cellChangeEvent={setCell}
-        rows={data}
-        columns={columns}
-        maxHeight="95vh"
-        loading={loading}
-        virtualizationOptions={{ enable: true, renderedRows: 90 }}
-        selectionOptions={{
-          rowActionSelects: false,
-          cellActionSelects: false,
-          getSelections: (data: SelectionData) => console.log("getSelections", data),
-        }}
-        formOptions={{ showForm: true, showOpenFormHandle: true, formView: "side" }}
-      ></ComboTable>
-    </div>
+    <>
+      <button onClick={() => requestsService.setTable(data, "photos")}>Save table</button>
+      <div className="App" style={{ display: "flex", justifyContent: "center", margin: "20px" }}>
+        <ComboTable
+          rowAction={(data) => console.log("row", data)}
+          // cellAction={(data) => console.log("cellAction", data)}
+          cellChangeEvent={setCell}
+          rows={data}
+          columns={columns}
+          maxHeight="92vh"
+          loading={loading}
+          virtualizationOptions={{ enable: true, renderedRows: 200 }}
+          selectionOptions={{
+            rowActionSelects: true,
+            cellActionSelects: false,
+            getSelections: (data: SelectionData) => console.log("getSelections", data),
+          }}
+          formOptions={{ showForm: showForm, setShowForm: setShowForm, showOpenFormHandle: true, formView: "side" }}
+        ></ComboTable>
+      </div>
+    </>
   );
 }
 

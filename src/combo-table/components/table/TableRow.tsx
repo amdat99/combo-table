@@ -2,7 +2,6 @@ import React from "react";
 import { useInView } from "react-intersection-observer";
 import CellContent from "./CellContent";
 import { Column, FormOptions, VirtualizationOptions } from "../../index";
-import { utils } from "../../utils";
 
 type Props = {
   rowIndex: number;
@@ -58,15 +57,25 @@ const TableRow = ({
 
   let shouldRender = virtualizationOptions.enable ? rowIndex >= virtualRange.lower && rowIndex <= virtualRange.upper : true;
   const extraRange = Math.floor(renderedRows / 3);
-  const viewCondition = (rowIndex - extraRange) % renderedRows === 0;
+  const viewCondition = (rowIndex - extraRange) % renderedRows === 0 || (rowIndex + extraRange) % renderedRows === 0;
   const rowSelected = selectedRowIds.includes(row.id);
+  console.log("rowSelected", rowSelected);
   const [prevSizes, setPrevSizes] = React.useState<any>({});
 
   React.useEffect(() => {
     //If last row of visible row in the virtual range, update virtual range
     if (inView) {
-      if (rowIndex + renderedRows + 2 !== virtualRange.upper) {
-        setVirtualRange({ lower: rowIndex - renderedRows, upper: rowIndex + (renderedRows + extraRange), currentId: row.id });
+      console.log(rowIndex, virtualRange.upper);
+      if (rowIndex + extraRange + 2 > virtualRange.upper) {
+        setVirtualRange({ lower: rowIndex - extraRange, upper: rowIndex + (renderedRows + extraRange), currentId: row.id });
+        console.log("Updating virtual range", virtualRange);
+      } else if (rowIndex - extraRange - 2 < virtualRange.lower) {
+        setVirtualRange({
+          lower: rowIndex - (renderedRows + extraRange),
+          upper: rowIndex + extraRange,
+          currentId: row.id,
+        });
+        console.log("Updating virtual range lower", virtualRange);
       }
     }
   }, [inView]);
@@ -90,7 +99,7 @@ const TableRow = ({
         >
           {columns.map((column: Column, cellIndex: number) => {
             //If type is checkbox, render checkbox
-            if (column.type === "checkbox") {
+            if (column.type === "checkbox-select") {
               return (
                 <td key={column.id || cellIndex}>
                   <input
@@ -111,6 +120,7 @@ const TableRow = ({
               return (
                 <td
                   className="combo-table-cell"
+                  id={column.key + "_" + cellIndex}
                   style={{
                     height: prevSizes[column.key + "_" + cellIndex]?.height || "",
                     width: prevSizes[column.key + "_" + cellIndex]?.width || "",

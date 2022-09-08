@@ -3,10 +3,11 @@ import React from "react";
 import ValidationBox from "./ValidationBox";
 
 import { textValidators } from "../../validators";
-import { Column, CellChangeEvent } from "../../index";
+import { Column, CellChangeEvent, FormOptions } from "../../index";
 import "../../styles/cell.css";
 import Select from "../shared/select";
 import tableService from "../../services/table.service";
+import Cell from "../shared/Cell";
 
 type Props = {
   row: any;
@@ -19,7 +20,7 @@ type Props = {
   prevSizes: any;
   setPrevSizes: Function;
   setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
-  formOptions: any;
+  formOptions: FormOptions;
 };
 
 const CellContent = ({
@@ -65,7 +66,7 @@ const CellContent = ({
       renderTimeout = setTimeout(() => {
         setRerender(!reresnder);
         renderTimeout = null;
-      }, 200);
+      }, 500);
 
       if (val.textarea && changeRef?.current?.style) {
         resizeTimeout = setTimeout(() => {
@@ -102,35 +103,24 @@ const CellContent = ({
       onMouseLeave={() => cellIndex === 1 && formOptions.showOpenFormHandle && setShowOpenHandle(false)}
     >
       {showOpenHandle && (
-        <div onClick={() => setShowForm(true)} className="combo-table-open-handle">
+        <div onClick={() => (formOptions ? formOptions.setShowForm(true) : setShowForm(true))} className="combo-table-open-handle">
           Open
         </div>
       )}
 
       {(!column.type || !renderInputs) && column.type !== "select" && (
-        <>
-          <div
-            onClick={checkInputTypes}
-            ref={valRef}
-            style={
-              column.styleTransformer
-                ? column.styleTransformer({ cell: row[column.key], row, rowIndex, cellIndex, cellKey: column.key })
-                : column.cellStyle || { height: prevSizes.height || "fit-content", width: prevSizes.width || "fit-content" }
-            }
-            className={
-              column.classTransformer
-                ? column.classTransformer({ cell: row[column.key], row, rowIndex, cellIndex, cellKey: column.key })
-                : column.cellClass || "combo-table-input"
-            }
-          >
-            {column.cellTransformer
-              ? column.cellTransformer({ cell: row[column.key], row, rowIndex, cellIndex, cellKey: column.key })
-              : row[column.key] || <span style={{ opacity: 0.5 }}>Enter {column.label}</span>}
-          </div>
-          {patternError && column.subType && <ValidationBox error={textValidators[column.subType]?.error} />}
-          {minLengthError && <ValidationBox error={`${column.label} must be at least ${column.minLength} characters`} />}
-          {maxLengthError && <ValidationBox error={`${column.label} must be at most ${column.maxLength} characters`} />}
-        </>
+        <Cell
+          prevSizes={prevSizes}
+          onClick={checkInputTypes}
+          ref={valRef}
+          row={row}
+          column={column}
+          rowIndex={rowIndex}
+          cellIndex={cellIndex}
+          minLengthError={minLengthError}
+          maxLengthError={maxLengthError}
+          patternError={patternError}
+        />
       )}
       {column.type === "date" && renderInputs && (
         <>
@@ -149,6 +139,19 @@ const CellContent = ({
       )}
       {column.type === "input" && renderInputs && (
         <>
+          {/* <Textarea
+            onChange={onCellChange}
+            row={row}
+            column={column}
+            rowIndex={rowIndex}
+            cellIndex={cellIndex}
+            ref={changeRef}
+            onBlur={onBlur}
+            patternError={patternError}
+            minLengthError={minLengthError}
+            maxLengthError={maxLengthError}
+          /> */}
+
           <textarea
             onChange={(e) =>
               onCellChange({
@@ -187,6 +190,7 @@ const CellContent = ({
             value={row[column.key]}
             columnKey={column.key}
             title={column.label}
+            cellIndex={cellIndex}
           />
         </>
       )}

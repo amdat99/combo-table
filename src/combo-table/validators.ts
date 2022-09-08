@@ -68,4 +68,4 @@ export const textValidators = {
   // text: null,
   // textarea: null,
   // select: null,
-};
+} as any;

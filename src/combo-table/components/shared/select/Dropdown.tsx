@@ -6,7 +6,7 @@ type Props = {
   dropdownData: {
     options: Options;
     title: string;
-    dropDownPosition: { x: number; y: number };
+    dropDownPosition: { x: number; y: number; width: number };
     onChange: (value: any, option: any, e: React.MouseEvent, multiple: boolean) => void;
     multiple: boolean;
     value: any;
@@ -32,14 +32,19 @@ function Dropdown({ dropdownData, selectRef, optionsMap }: Props) {
     <div
       className="combo-table-dropdown"
       ref={selectRef}
-      style={{ top: dropDownPosition?.y - 20 + "px", left: dropDownPosition?.x - 40 + "px", position: "fixed" }}
+      style={{
+        top: dropDownPosition?.y - 20 + "px",
+        left: dropDownPosition?.x + "px",
+        position: "fixed",
+        width: dropDownPosition?.width + "px",
+      }}
     >
       <div className="combo-table-select-label-wrapper">
         {currentValue &&
           currentValue.map((val: any, index: number) => (
             <div
               style={{
-                color: optionsMap[columnKey][val]?.color || "grey",
+                background: optionsMap[columnKey][val]?.color || "grey",
                 borderColor: optionsMap[columnKey][val]?.color || "grey",
                 display: val ? "initial" : "none",
               }}
@@ -60,7 +65,7 @@ function Dropdown({ dropdownData, selectRef, optionsMap }: Props) {
             onPushValueChange(option.value);
           }}
         >
-          <div style={{ color: option.color || "grey", border: `1px solid ${option.color}` || "grey" }} className="combo-table-select-label">
+          <div style={{ background: option.color || "grey", border: `1px solid ${option.color}` || "grey" }} className="combo-table-select-label">
             {option.label}
           </div>
         </div>

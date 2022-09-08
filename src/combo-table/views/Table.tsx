@@ -1,6 +1,16 @@
 import React from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
-import { CellAction, CellChangeEvent, Column, FooterData, RowAction, SelectionData, SelectionOptions, VirtualizationOptions } from "../index";
+import {
+  CellAction,
+  CellChangeEvent,
+  Column,
+  FooterData,
+  FormOptions,
+  RowAction,
+  SelectionData,
+  SelectionOptions,
+  VirtualizationOptions,
+} from "../index";
 import TableFooter from "../components/table/TableFooter";
 import TableRow from "../components/table/TableRow";
 
@@ -19,7 +29,7 @@ type Props = {
   dynamicCellHeight?: boolean;
   virtualizationOptions?: VirtualizationOptions;
   selectionOptions?: SelectionOptions;
-  formOptions?: { showForm: boolean; showOpenFormHandle: boolean; formView: "side" | "modal" | "full" };
+  formOptions?: FormOptions;
   customFooterComponent?: ((data: FooterData) => React.ReactNode) | null;
   onSelectRows?: (row: any, rowIndex: number, checkbox?: boolean, virtual?: boolean) => void;
   onSelectCells?: (cell: any, cellIndex: number, row: any) => void;
@@ -43,7 +53,7 @@ function Table({
   cellChangeEvent = () => {},
   virtualizationOptions = { renderedRows: 50, enable: false },
   selectionOptions = { rowActionSelects: false, cellActionSelects: false },
-  formOptions = { showForm: false, showOpenFormHandle: false, formView: "side" },
+  formOptions = { showForm: false, setShowForm: () => {}, showOpenFormHandle: true, formView: "side" },
   customFooterComponent = null,
   onSelectRows = () => {},
   onSelectCells = () => {},

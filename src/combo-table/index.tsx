@@ -49,13 +49,12 @@ const ComboTable = (props: Props) => {
   const formRef = React.useRef(null);
   const selectRef = React.useRef<HTMLDivElement>(null);
   //Hook to detect click outside of the sleect dropdown
+  const { rows, type, selectionOptions, loading, customLoaderComponent, maxHeight, maxWidth, columns, formOptions } = props;
 
   useOnClickOutside(selectRef, () => setDropdownData({}));
 
   //Hook to detect click outside of the form component
-  useOnClickOutside(formRef, () => setShowForm(false));
-
-  const { rows, type, selectionOptions, loading, customLoaderComponent, maxHeight, maxWidth, columns } = props;
+  useOnClickOutside(formRef, () => (formOptions ? formOptions.setShowForm(false) : setShowForm(false)));
 
   useEffect(() => {
     OnSetCurrentRows();
@@ -71,6 +70,7 @@ const ComboTable = (props: Props) => {
       columns.forEach((column) => {
         if (column.hasOwnProperty("options")) optionsMap[column.key] = utils.objectify(utils.fieldMap(column.options));
       });
+      console.log(optionsMap);
     }
   }, [columns]);
 
@@ -93,8 +93,7 @@ const ComboTable = (props: Props) => {
       selectionOptions,
       selectedCells,
       selectedRowIds,
-      selectedCellRowIds,
-      setSelectedRowLength
+      selectedCellRowIds
     );
     setSelectedRowLength(selectedRows.length);
   };
@@ -108,32 +107,32 @@ const ComboTable = (props: Props) => {
     selectedCellRowIds.push(cellIndex + "_" + row.id);
   };
 
+  const showFormFlag = formOptions ? formOptions.showForm : showForm;
   return (
     <>
-      {showForm && <Form formRef={formRef} />}
       {dropdownData?.options && <Dropdown dropdownData={dropdownData} optionsMap={optionsMap} selectRef={selectRef} />}
       <DropDownContext.Provider value={value}>
-        <div
-          className="combo-table-table-wrapper combo-table-table-shadow combo-table-hide-scrollbar"
-          style={{ height: maxHeight || "100%", maxWidth: maxWidth || "100%" }}
-        >
-          {loading && (customLoaderComponent || <span className="combo-table-loader"></span>)}
-          {type === "table" && (
-            <Table
-              {...props}
-              onSelectRows={onSelectRows}
-              onSelectCells={onSelectCells}
-              currentRows={currentRows}
-              selectedRowLength={selectedRowLength}
-              selectedRowIds={selectedRowIds}
-              selectedCellRowIds={selectedCellRowIds}
-              selectedCells={selectedCells}
-              selectedRows={selectedRows}
-              setShowForm={setShowForm}
-              setCurrentRows={OnSetCurrentRows}
-            />
-          )}
-        </div>
+        {showFormFlag && <Form formRef={formRef} />}
+        <>
+          <div className="combo-table-table-wrapper  " style={{ height: maxHeight || "100%", maxWidth: maxWidth || "100%" }}>
+            {loading && (customLoaderComponent || <span className="combo-table-loader"></span>)}
+            {type === "table" && (
+              <Table
+                {...props}
+                onSelectRows={onSelectRows}
+                onSelectCells={onSelectCells}
+                currentRows={currentRows}
+                selectedRowLength={selectedRowLength}
+                selectedRowIds={selectedRowIds}
+                selectedCellRowIds={selectedCellRowIds}
+                selectedCells={selectedCells}
+                selectedRows={selectedRows}
+                setShowForm={setShowForm}
+                setCurrentRows={OnSetCurrentRows}
+              />
+            )}
+          </div>
+        </>
       </DropDownContext.Provider>
     </>
   );
@@ -227,6 +226,7 @@ export type CellChangeEvent = {
   option?: any;
   multiple?: boolean;
   cb?: any;
+  delete?: boolean;
 };
 
 export type SelectionOptions = {
@@ -250,6 +250,11 @@ export type FooterData = {
   selectedRowLength: number;
 };
 
-export type FormOptions = { showForm: boolean; showOpenFormHandle: boolean; formView: "side" | "modal" | "full" };
+export type FormOptions = {
+  showForm: boolean;
+  setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
+  showOpenFormHandle?: boolean;
+  formView?: "side" | "modal" | "full";
+};
 
 export type VirtualizationOptions = { renderedRows: number; enable: boolean };

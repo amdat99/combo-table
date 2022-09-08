@@ -10,16 +10,30 @@ type Props = {
   onChange: (value: string | number | any[], option: any, e: React.MouseEvent, multiple?: boolean | undefined) => void;
   multiple: boolean;
   columnKey: string;
+  cellIndex: number;
 };
 
-function Select({ options, value, title, onChange, multiple, columnKey }: Props) {
+function Select({ options, value, title, onChange, multiple, columnKey, cellIndex }: Props) {
   const { setDropdownData, optionsMap } = React.useContext(DropDownContext);
 
   const currentValue = utils.isArray(value) ? value : [value];
 
   const onShowDropDown = (event: React.MouseEvent) => {
+    const cell = document.getElementById(columnKey + "_" + cellIndex);
+    //@ts-ignore
+    const rect = cell.getBoundingClientRect();
+    const width = rect.right - rect.left;
+
     event.stopPropagation();
-    setDropdownData({ dropDownPosition: { x: event.clientX, y: event.clientY }, columnKey, options, value: currentValue, title, onChange, multiple });
+    setDropdownData({
+      dropDownPosition: { x: rect.left, y: event.clientY, width },
+      columnKey,
+      options,
+      value: currentValue,
+      title,
+      onChange,
+      multiple,
+    });
   };
 
   return (
@@ -29,7 +43,7 @@ function Select({ options, value, title, onChange, multiple, columnKey }: Props)
           //@ts-ignore
           currentValue.map((val: any, index: number) => (
             <div
-              style={{ color: optionsMap[columnKey][val]?.color || "grey", borderColor: optionsMap[columnKey][val]?.color || "grey" }}
+              style={{ background: optionsMap[columnKey][val]?.color || "grey", borderColor: optionsMap[columnKey][val]?.color || "grey" }}
               className="combo-table-select-label"
               key={val?.id || index}
             >
