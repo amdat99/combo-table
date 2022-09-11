@@ -10,10 +10,10 @@ import { utils } from "./utils";
 import "./styles/variables.css";
 import "./styles/table.css";
 import "./styles/select.css";
+import Toolbar from "./components/shared/toolbar";
 
 type Props = {
-  columns: Column[];
-  rows: any[];
+  tableData: { key: string; title?: string; columns: Column[]; rows: any[]; startingType?: string }[];
   type?: "table" | "board" | "list" | "card";
   loading?: boolean;
   maxHeight?: string;
@@ -22,6 +22,7 @@ type Props = {
   rowAction?: (rowData: RowAction) => void;
   cellAction?: (cellData: CellAction) => void;
   cellChangeEvent?: (data: CellChangeEvent) => void;
+  columnChangeEvent?: (data: ColumnChangeEvent) => void;
   noDataComponent?: React.ReactNode;
   customLoaderComponent?: React.ReactNode;
   dynamicCellHeight?: boolean;
@@ -34,51 +35,47 @@ type Props = {
 export const DropDownContext = React.createContext<any>(null);
 
 const ComboTable = (props: Props) => {
-  const [currentRows, setCurrentRows] = useState<any>([]);
-  const [optionsMap] = useState<any>({});
-  const [currentType, setCurrentType] = useState(props.type);
+  const [optionsMap, setOptionsMap] = useState<any>({});
+  const [typeMap, setTypeMap] = useState<any>({});
   const [showForm, setShowForm] = useState(false);
+  const [tableKeys, setTableKeys] = useState<any[]>([]);
   const [selectedRows, setSelectedRows] = useState<any>([]);
   const [selectedRowLength, setSelectedRowLength] = useState(0);
   const [selectedCells, setSelectedCells] = useState<any>([]);
   const [selectedCellRowIds, setSelectedCellRowIds] = useState<any>([]);
   const [selectedRowIds, setSelectedRowIds] = useState<any>([]);
   const [dropdownData, setDropdownData] = useState<any>({});
+  const [currentTableKey, setCurrentTableKey] = useState("");
   const value = React.useMemo(() => ({ dropdownData, setDropdownData, optionsMap }), [dropdownData, optionsMap]);
 
   const formRef = React.useRef(null);
   const selectRef = React.useRef<HTMLDivElement>(null);
   //Hook to detect click outside of the sleect dropdown
-  const { rows, type, selectionOptions, loading, customLoaderComponent, maxHeight, maxWidth, columns, formOptions } = props;
+  const { selectionOptions, loading, customLoaderComponent, maxHeight, maxWidth, formOptions, tableData } = props;
 
   useOnClickOutside(selectRef, () => setDropdownData({}));
 
   //Hook to detect click outside of the form component
   useOnClickOutside(formRef, () => (formOptions ? formOptions.setShowForm(false) : setShowForm(false)));
 
-  useEffect(() => {
-    OnSetCurrentRows();
-  }, [rows]);
-
-  const OnSetCurrentRows = React.useCallback(() => {
-    setCurrentRows([...rows]);
-  }, [rows]);
-
   //If column is select converts the options array into an object with the value as the key and hte column label as
   useEffect(() => {
-    if (columns.length > 0) {
-      columns.forEach((column) => {
-        if (column.hasOwnProperty("options")) optionsMap[column.key] = utils.objectify(utils.fieldMap(column.options));
-      });
-      console.log(optionsMap);
-    }
-  }, [columns]);
-
-  useEffect(() => {
-    if (currentType !== type) {
-      setCurrentType(type);
-    }
-  }, [type]);
+    const types: any = {};
+    const tableKeys: any = [];
+    tableData.forEach((table) => {
+      types[table.key] = table.startingType || "table";
+      tableKeys.push(table.key);
+      if (table.columns.length > 0) {
+        table.columns.forEach((column) => {
+          if (column.hasOwnProperty("options")) optionsMap[column.key] = utils.objectify(utils.fieldMap(column.options));
+        });
+      }
+    });
+    setCurrentTableKey(tableData[0].key);
+    setTypeMap(types);
+    setTableKeys(tableKeys);
+    console.log("oepoire", optionsMap);
+  }, [tableData]);
 
   //Handles the selection of checkbox select and row on clcik if selectionOptions.rowactionSelects is true
   const onSelectRows = (row: any, rowIndex: number, bulk = false, checkbox = false) => {
@@ -110,29 +107,36 @@ const ComboTable = (props: Props) => {
   const showFormFlag = formOptions ? formOptions.showForm : showForm;
   return (
     <>
-      {dropdownData?.options && <Dropdown dropdownData={dropdownData} optionsMap={optionsMap} selectRef={selectRef} />}
+      {dropdownData?.options && <Dropdown dropdownData={dropdownData} optionsMap={optionsMap} selectRef={selectRef} setOptionsMap={setOptionsMap} />}
       <DropDownContext.Provider value={value}>
         {showFormFlag && <Form formRef={formRef} />}
-        <>
-          <div className="combo-table-table-wrapper  " style={{ height: maxHeight || "100%", maxWidth: maxWidth || "100%" }}>
-            {loading && (customLoaderComponent || <span className="combo-table-loader"></span>)}
-            {type === "table" && (
-              <Table
-                {...props}
-                onSelectRows={onSelectRows}
-                onSelectCells={onSelectCells}
-                currentRows={currentRows}
-                selectedRowLength={selectedRowLength}
-                selectedRowIds={selectedRowIds}
-                selectedCellRowIds={selectedCellRowIds}
-                selectedCells={selectedCells}
-                selectedRows={selectedRows}
-                setShowForm={setShowForm}
-                setCurrentRows={OnSetCurrentRows}
-              />
-            )}
-          </div>
-        </>
+        <div className="combo-table-table-wrapper" style={{ height: maxHeight || "100%", maxWidth: maxWidth || "100%" }}>
+          {loading && (customLoaderComponent || <span className="combo-table-loader"></span>)}
+          <Toolbar tableKeys={tableKeys} setCurrentTableKey={setCurrentTableKey} currentTableKey={currentTableKey} />
+          {tableData.map((table) => {
+            return (
+              <div key={table.key}>
+                {currentTableKey === table.key && typeMap[table.key] === "table" && (
+                  <Table
+                    {...props}
+                    onSelectRows={onSelectRows}
+                    onSelectCells={onSelectCells}
+                    selectedRowLength={selectedRowLength}
+                    selectedRowIds={selectedRowIds}
+                    selectedCellRowIds={selectedCellRowIds}
+                    selectedCells={selectedCells}
+                    selectedRows={selectedRows}
+                    setShowForm={setShowForm}
+                    columns={table.columns}
+                    rows={table.rows}
+                    title={table.title}
+                    tableKey={table.key}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
       </DropDownContext.Provider>
     </>
   );
@@ -188,6 +192,7 @@ export type RowAction = {
   selectedRows: any[];
   selectedCells: any[];
   event: React.MouseEvent;
+  tableKey: string | number;
 };
 
 export type CellAction = {
@@ -199,6 +204,7 @@ export type CellAction = {
   selectedRows: any[];
   selectedCells: any[];
   event: React.MouseEvent;
+  tableKey: string | number;
 };
 
 export type Transformer = {
@@ -215,6 +221,7 @@ export type CellChangeEvent = {
   value: any;
   row: any;
   cellKey: string;
+  tableKey: string | number;
   cellIndex: number;
   rowIndex: number;
   minLengthError?: string;
@@ -227,6 +234,17 @@ export type CellChangeEvent = {
   multiple?: boolean;
   cb?: any;
   delete?: boolean;
+};
+
+export type ColumnChangeEvent = {
+  type: string;
+  tableKey: string | number;
+  columnKey: string;
+  value: any;
+  options: any[];
+  columnIndex: number;
+  prevOptions: any[];
+  event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement> | React.MouseEvent;
 };
 
 export type SelectionOptions = {

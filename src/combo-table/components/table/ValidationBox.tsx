@@ -6,6 +6,11 @@ type Props = {
 };
 
 function ValidationBox({ error }: Props) {
+  React.useEffect(() => {
+    if (error) {
+      console.log(error);
+    }
+  }, [error]);
   return (
     <div className="combo-table-validation-box">
       <span>{error || ""}</span>

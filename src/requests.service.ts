@@ -1,28 +1,37 @@
 import { data } from "./data";
 
-const fetchData = async (url: string, cb: Function) => {
+const fetchData = async (url: string | string[], cb: Function) => {
   // const response = await fetch(url);
   // const data = await response.json();
 
-  const rows = localStorage.getItem(url);
-  if (rows && rows !== "[]") {
-    setTimeout(cb, 600, JSON.parse(rows));
-  } else {
-    //@ts-ignore
-    const rows = data[url];
-    localStorage.setItem(url, JSON.stringify(rows));
-    setTimeout(cb, 600, rows);
-  }
+  const currentData = typeof url === "string" ? [url] : url;
+
+  const response: any = {};
+
+  currentData.forEach((url, index) => {
+    const rows = localStorage.getItem(url);
+    if (rows && rows !== "[]") {
+      response[url] = JSON.parse(rows);
+    } else {
+      //@ts-ignore
+      const rows = data[url];
+      localStorage.setItem(url, JSON.stringify(rows));
+      response[url] = rows;
+    }
+  });
+  setTimeout(() => {
+    cb(response);
+  }, 300);
 };
 
-const setTable = (data: any, key: string) => {
-  console.log("setTable", data, key);
-  localStorage.setItem(key, JSON.stringify(data));
+const setData = (data: any, key: string | number) => {
+  console.log("setData", data, key);
+  localStorage.setItem(key.toString(), JSON.stringify(data));
 };
 
 const requestsService = {
   fetchData,
-  setTable,
+  setData,
 } as const;
 
 Object.freeze(requestsService);

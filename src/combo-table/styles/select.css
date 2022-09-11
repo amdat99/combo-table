@@ -20,6 +20,10 @@
   flex-direction: row;
   flex-wrap: wrap;
 }
+
+.combo-table-select-label-wrapper:hover {
+  border-bottom: 1px solid var(--combo-table-border);
+}
 .combo-table-select-label {
   font-size: 13px;
   color: white;
@@ -37,8 +41,22 @@
   opacity: 1;
 }
 
+.combo-table-select-create-wrapper {
+  display: flex;
+  flex-direction: row;
+  font: size 13.5px;
+  margin: 2px;
+  cursor: pointer;
+}
+.combo-table-select-create-wrapper:hover {
+  background-color: var(--combo-table-secondary);
+}
+
 .combo-table-options {
   padding: 2px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 .combo-table-options:hover {
   background-color: var(--combo-table-background-hover) !important;

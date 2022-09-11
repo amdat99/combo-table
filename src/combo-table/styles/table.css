@@ -1,5 +1,4 @@
 .combo-table-table-wrapper {
-  overflow: auto;
   width: 100%;
   height: 100%;
   background: var(--combo-table-background);
@@ -10,6 +9,7 @@
   box-shadow: 0 0 0px 0 var(--combo-table-shadow);
   -webkit-box-shadow: 0 0 6px 0 var(--combo-table-shadow);
   padding-top: 0px;
+  overflow: auto;
 }
 
 .combo-table-table {
@@ -17,7 +17,15 @@
   width: 100%;
   font-size: 13.5px;
 }
-
+.combo-table-toolbar {
+  background-color: var(--combo-table-secondary);
+  display: flex;
+  position: sticky;
+  z-index: 250;
+  height: 30px;
+  top: 0px;
+  justify-content: space-between;
+}
 .combo-table-header {
   position: sticky;
   z-index: 250;
@@ -29,8 +37,8 @@
   backdrop-filter: blur(100px);
   border-radius: 9px;
   border-bottom: 2px solid var(--combo-table-border);
-  top: 0px;
-
+  border-top: 1px solid var(--combo-table-border);
+  top: 30px;
   box-shadow: blur(10px) 0px 0px 10px var(--combo-table-shadow);
 }
 
@@ -39,14 +47,28 @@
   padding: 5px;
 }
 
-.combo-table-toolbar {
-  height: 20px;
-  z-index: 999;
-  top: -10px !important;
+.combo-table-table-tab {
+  z-index: 9650;
   vertical-align: middle;
+  cursor: pointer;
   text-align: left;
-  background-color: var(--combo-table-background);
+  font-size: 13px;
+  margin: 2px;
+  padding: 0px;
+  border-radius: 3px;
+  position: relative;
+  bottom: 2px;
+  padding: 1px;
+  background: var(--combo-table-background);
+  color: var(--combo-table-text);
+  box-shadow: 1px 1px 1px 0px var(--combo-table-shadow);
+  border: 1px solid var(--combo-table-border);
 }
+
+.combo-table-table-tab:hover {
+  color: var(--combo-table-primary);
+}
+
 .combo-table-title {
   font-size: 15px;
   font-weight: bold;
@@ -97,6 +119,22 @@
 
 .combo-table-row:hover .combo-table-table-check {
   opacity: 1;
+}
+
+.combo-table-icon {
+  cursor: pointer;
+  position: relative;
+  top: 8px;
+  width: 18px;
+  height: 18px;
+  color: var(--combo-table-text);
+  padding: 2px;
+  margin: 2px;
+}
+
+.combo-table-icon:hover {
+  background-color: var(--combo-table-background);
+  border-radius: 4px;
 }
 
 .combo-table-open-handle {

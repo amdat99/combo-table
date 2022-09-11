@@ -1,13 +1,14 @@
 import React from "react";
 import "./App.css";
-import ComboTable, { Column, CellChangeEvent, Transformer, SelectionData } from "./combo-table";
+import ComboTable, { Column, CellChangeEvent, Transformer, SelectionData, ColumnChangeEvent } from "./combo-table";
 import requestsService from "./requests.service";
 
 function App() {
-  const [data, setData] = React.useState<any>([]);
+  const [data, setData] = React.useState<any>({ photos: [], posts: [] });
   const [loading, setLoading] = React.useState(false);
   const [showForm, setShowForm] = React.useState(false);
-  const columns: Column[] = [
+  const [fields, setFields] = React.useState<any>({});
+  const photoColumns: Column[] = [
     { key: "checkbox", label: "", type: "checkbox-select" },
     {
       key: "pic",
@@ -38,10 +39,7 @@ function App() {
       label: "select",
       columnStyle: { width: "20%" },
       type: "select",
-      options: [
-        { label: "Option1", value: "Option1", color: "blue" },
-        { label: "Option2", value: "Option2", color: "pink" },
-      ],
+      options: fields.selectFields || [],
       multiple: true,
     },
 
@@ -54,52 +52,81 @@ function App() {
     },
   ];
 
+  const postColumns: Column[] = [
+    { key: "checkbox", label: "", type: "checkbox-select" },
+    { key: "id", label: "Id" },
+    { key: "userId", label: "User Id" },
+    { key: "title", label: "Title", minLength: 2, maxLength: 150, type: "input" },
+    { key: "body", label: "Body", minLength: 2, maxLength: 500, type: "input", columnStyle: { maxWidth: "200px" } },
+  ];
+
   let timeout: any = null;
 
   React.useEffect(() => {
     fetchData();
-    // window.addEventListener("beforeunload", () => requestsService.setTable(data, "photos"));
+    fetchFields();
   }, []);
 
   const fetchData = async () => {
     setLoading(true);
-    const fetchCb = (res: any) => {
+
+    const cb = (res: { photos: any[]; posts: any[] }) => {
       setLoading(false);
       setData(res);
     };
-    requestsService.fetchData("photos", fetchCb);
+
+    requestsService.fetchData(["photos", "posts"], cb);
+  };
+
+  const fetchFields = async () => {
+    const cb = (res: any) => {
+      setFields(res);
+    };
+
+    requestsService.fetchData(["selectFields"], cb);
   };
 
   const setCell = (changeData: CellChangeEvent) => {
     if (changeData.hasError) {
       return console.log(changeData);
     }
-    data[changeData.rowIndex][changeData.cellKey] = changeData.value;
+    console.log(changeData);
+    data[changeData.tableKey][changeData.rowIndex][changeData.cellKey] = changeData.value;
 
     timeout = setTimeout(() => {
-      requestsService.setTable(data, "photos");
+      requestsService.setData(data[changeData.tableKey], changeData.tableKey);
       clearTimeout(timeout);
-    }, 10000);
+    }, 5000);
+  };
+
+  const onColumnMutation = (data: ColumnChangeEvent) => {
+    if (data.type === "options" && data.tableKey === "photos") {
+      photoColumns[data.columnIndex].options = data.options;
+      requestsService.setData(data.options, "selectFields");
+    }
   };
 
   return (
     <>
-      <button onClick={() => requestsService.setTable(data, "photos")}>Save table</button>
-      <div className="App" style={{ display: "flex", justifyContent: "center", margin: "20px" }}>
+      <button onClick={() => requestsService.setData(data.photos, "photos")}>Save table</button>
+      <div style={{ margin: "20px" }}>
         <ComboTable
           rowAction={(data) => console.log("row", data)}
           // cellAction={(data) => console.log("cellAction", data)}
           cellChangeEvent={setCell}
-          rows={data}
-          columns={columns}
-          maxHeight="92vh"
+          columnChangeEvent={(data) => onColumnMutation(data)}
+          tableData={[
+            { rows: data.photos, key: "photos", columns: photoColumns, startingType: "table" },
+            { rows: data.posts, key: "posts", columns: postColumns, startingType: "table" },
+          ]}
           loading={loading}
-          virtualizationOptions={{ enable: true, renderedRows: 200 }}
+          virtualizationOptions={{ enable: true, renderedRows: 100 }}
           selectionOptions={{
             rowActionSelects: true,
             cellActionSelects: false,
             getSelections: (data: SelectionData) => console.log("getSelections", data),
           }}
+          maxHeight={"95vh"}
           formOptions={{ showForm: showForm, setShowForm: setShowForm, showOpenFormHandle: true, formView: "side" }}
         ></ComboTable>
       </div>

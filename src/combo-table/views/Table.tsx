@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import {
   CellAction,
   CellChangeEvent,
   Column,
+  ColumnChangeEvent,
   FooterData,
   FormOptions,
   RowAction,
@@ -14,6 +15,7 @@ import {
 import TableFooter from "../components/table/TableFooter";
 import TableRow from "../components/table/TableRow";
 
+import "../styles/table.css";
 type Props = {
   columns: Column[];
   type?: "table" | "board" | "list" | "card";
@@ -24,6 +26,7 @@ type Props = {
   rowAction?: (rowData: RowAction) => void;
   cellAction?: (cellData: CellAction) => void;
   cellChangeEvent?: (data: CellChangeEvent) => void;
+  columnChangeEvent?: (data: ColumnChangeEvent) => void;
   noDataComponent?: React.ReactNode;
   customLoaderComponent?: React.ReactNode;
   dynamicCellHeight?: boolean;
@@ -33,14 +36,15 @@ type Props = {
   customFooterComponent?: ((data: FooterData) => React.ReactNode) | null;
   onSelectRows?: (row: any, rowIndex: number, checkbox?: boolean, virtual?: boolean) => void;
   onSelectCells?: (cell: any, cellIndex: number, row: any) => void;
-  currentRows?: any[];
   selectedRowLength?: number;
   selectedRowIds?: any[];
   selectedCellRowIds?: string | number[];
   selectedCells?: any[];
   selectedRows?: any[];
   setShowForm?: React.Dispatch<React.SetStateAction<boolean>>;
-  setCurrentRows?: (currentRows: any[]) => void;
+  rows: any[];
+  tableKey?: string | number;
+  title?: string;
 };
 
 function Table({
@@ -50,6 +54,7 @@ function Table({
   loading = false,
   noDataComponent = null,
   maxWidth = "",
+  maxHeight = "",
   cellChangeEvent = () => {},
   virtualizationOptions = { renderedRows: 50, enable: false },
   selectionOptions = { rowActionSelects: false, cellActionSelects: false },
@@ -57,16 +62,37 @@ function Table({
   customFooterComponent = null,
   onSelectRows = () => {},
   onSelectCells = () => {},
-  currentRows = [],
   selectedRowLength = 0,
   selectedRowIds = [],
   selectedCellRowIds = [],
   selectedCells = [],
   selectedRows = [],
   setShowForm = () => {},
-  setCurrentRows = () => {},
+  rows = [],
+  title = "",
+  tableKey = "",
+  columnChangeEvent = () => {},
 }: Props) {
+  const [currentRows, setCurrentRows] = React.useState<any[]>([]);
+  const [currentColumns, setCurrentColumns] = React.useState<Column[]>([]);
   const [virtualRange, setVirtualRange] = React.useState({ lower: 0, upper: virtualizationOptions?.renderedRows, currentId: 0 });
+
+  useEffect(() => {
+    if (rows && rows.length > 0) OnSetCurrentRows();
+    console.log(currentRows, rows);
+  }, [rows]);
+
+  useEffect(() => {
+    if (columns && columns.length > 0) OnSetCurrentColumns();
+  }, [columns]);
+
+  const OnSetCurrentRows = React.useCallback(() => {
+    setCurrentRows([...rows]);
+  }, [rows]);
+
+  const OnSetCurrentColumns = React.useCallback(() => {
+    setCurrentColumns([...columns]);
+  }, [columns]);
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) {
@@ -90,7 +116,7 @@ function Table({
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <table style={{ opacity: loading ? 0.5 : 1 }} className="combo-table-table ">
-        {columns.length > 0 && (
+        {currentColumns.length > 0 && (
           // <Droppable droppableId="board" type="ROW" direction={"horizontal"}>
           //   {(provided) => {
           // return (
@@ -98,7 +124,7 @@ function Table({
             <tr
             // ref={provided.innerRef} {...provided.droppableProps}
             >
-              {columns.map((column, i) => (
+              {currentColumns.map((column, i) => (
                 // <Draggable key={column.key || i} draggableId={column.key} index={i}>
                 //   {(provided) => (
                 <th
@@ -152,9 +178,12 @@ function Table({
                     setVirtualRange={setVirtualRange}
                     setCurrentRows={setCurrentRows}
                     virtualizationOptions={virtualizationOptions}
+                    columnChangeEvent={columnChangeEvent}
                     // selectionOptions={selectionOptions}
+                    setCurrentColumns={setCurrentColumns}
                     formOptions={formOptions}
                     setShowForm={setShowForm}
+                    tableKey={tableKey}
 
                     // provided={provided}
                   />

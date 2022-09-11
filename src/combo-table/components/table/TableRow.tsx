@@ -1,7 +1,7 @@
 import React from "react";
 import { useInView } from "react-intersection-observer";
 import CellContent from "./CellContent";
-import { Column, FormOptions, VirtualizationOptions } from "../../index";
+import { CellChangeEvent, Column, ColumnChangeEvent, FormOptions, VirtualizationOptions } from "../../index";
 
 type Props = {
   rowIndex: number;
@@ -17,8 +17,10 @@ type Props = {
   cellAction: (cell: any) => void;
   onSelectCells: (cell: any, cellIndex: number, row: any) => void;
   currentRows: any[];
-  cellChangeEvent: (cell: any) => void;
+  cellChangeEvent: (cell: CellChangeEvent) => void;
+  columnChangeEvent: (column: ColumnChangeEvent) => void;
   setCurrentRows: (currentRows: any[]) => void;
+  setCurrentColumns: (columns: any[]) => void;
   setVirtualRange: React.Dispatch<
     React.SetStateAction<{
       lower: number;
@@ -29,6 +31,7 @@ type Props = {
   virtualizationOptions: VirtualizationOptions;
   formOptions: FormOptions;
   setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
+  tableKey: string | number;
 };
 const TableRow = ({
   rowIndex,
@@ -49,6 +52,9 @@ const TableRow = ({
   setVirtualRange,
   virtualizationOptions,
   formOptions,
+  tableKey,
+  columnChangeEvent,
+  setCurrentColumns,
   setShowForm,
 }: Props) => {
   //Hook to check if element is currently visible in the viewport
@@ -59,7 +65,6 @@ const TableRow = ({
   const extraRange = Math.floor(renderedRows / 3);
   const viewCondition = (rowIndex - extraRange) % renderedRows === 0 || (rowIndex + extraRange) % renderedRows === 0;
   const rowSelected = selectedRowIds.includes(row.id);
-  console.log("rowSelected", rowSelected);
   const [prevSizes, setPrevSizes] = React.useState<any>({});
 
   React.useEffect(() => {
@@ -80,6 +85,12 @@ const TableRow = ({
     }
   }, [inView]);
 
+  const onSetColumns = (data: any[], index: number) => {
+    const newColumns = [...columns];
+    newColumns[index].options = data;
+    setCurrentColumns(newColumns);
+  };
+
   return (
     <>
       {/* If virtualization is enabled render rows if rowIndex is between the virtualRange, otherwhise always render */}
@@ -88,7 +99,7 @@ const TableRow = ({
           onClick={(event: React.MouseEvent) => {
             onSelectRows(row, rowIndex);
             setTimeout(() => {
-              rowAction({ row, event, selectedRows, selectedCells, rowIndex });
+              rowAction({ row, event, selectedRows, selectedCells, rowIndex, tableKey });
             }, 0);
           }}
           //set ref if the row index is diviable by the visible rows
@@ -138,6 +149,7 @@ const TableRow = ({
                         selectedCells,
                         event,
                         cellKey: column.key,
+                        tableKey,
                       });
                     }, 0);
                   }}
@@ -148,12 +160,15 @@ const TableRow = ({
                     rowIndex={rowIndex}
                     cellIndex={cellIndex}
                     setCurrentRows={setCurrentRows}
+                    onSetColumns={onSetColumns}
                     currentRows={currentRows}
                     cellChangeEvent={cellChangeEvent}
+                    columnChangeEvent={columnChangeEvent}
                     prevSizes={prevSizes}
                     setPrevSizes={setPrevSizes}
                     formOptions={formOptions}
                     setShowForm={setShowForm}
+                    tableKey={tableKey}
                   />
                 </td>
               );

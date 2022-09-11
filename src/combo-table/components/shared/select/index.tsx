@@ -11,9 +11,10 @@ type Props = {
   multiple: boolean;
   columnKey: string;
   cellIndex: number;
+  onColumnChange: (options: any[], prevValue: any[], value: any, event: React.MouseEvent) => void;
 };
 
-function Select({ options, value, title, onChange, multiple, columnKey, cellIndex }: Props) {
+function Select({ options, value, title, onChange, multiple, columnKey, cellIndex, onColumnChange }: Props) {
   const { setDropdownData, optionsMap } = React.useContext(DropDownContext);
 
   const currentValue = utils.isArray(value) ? value : [value];
@@ -32,6 +33,7 @@ function Select({ options, value, title, onChange, multiple, columnKey, cellInde
       value: currentValue,
       title,
       onChange,
+      onColumnChange,
       multiple,
     });
   };

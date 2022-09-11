@@ -47,25 +47,11 @@ const selectRows = (
 
 const onCellValidate = (val: CellChangeEvent, currentRows: any, rowIndex: number, column: Column) => {
   let hasError = false;
-  let duplicate = false;
-  if (val.multiple) {
-    if (!currentRows[rowIndex][column.key]) {
-      currentRows[rowIndex][column.key] = [];
-    } else {
-      currentRows[rowIndex][column.key].forEach((cell: any) => {
-        if (cell === val.value) {
-          duplicate = true;
-        }
-      });
-    }
-    if (duplicate) {
-      return val;
-    }
-    currentRows[rowIndex][column.key].push(val.value);
-  } else {
-    currentRows[rowIndex][column.key] = val.value;
-  }
-  // setCurrentRows(newRows);
+  //Set the cuurent cell value
+
+  currentRows[rowIndex][column.key] = val.value;
+
+  //Error validation checks
   if (column.maxLength && checkIfNumForLength(val.value, column) > column.maxLength) {
     val.maxLengthError = `${column.label} must be below ${column.maxLength} characters`;
     hasError = true;

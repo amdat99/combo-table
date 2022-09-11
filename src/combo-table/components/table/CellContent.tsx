@@ -3,7 +3,7 @@ import React from "react";
 import ValidationBox from "./ValidationBox";
 
 import { textValidators } from "../../validators";
-import { Column, CellChangeEvent, FormOptions } from "../../index";
+import { Column, CellChangeEvent, FormOptions, ColumnChangeEvent } from "../../index";
 import "../../styles/cell.css";
 import Select from "../shared/select";
 import tableService from "../../services/table.service";
@@ -16,11 +16,14 @@ type Props = {
   cellIndex: number;
   currentRows: any[];
   cellChangeEvent: (data: CellChangeEvent) => void;
+  columnChangeEvent: (data: ColumnChangeEvent) => void;
   setCurrentRows: (data: any[]) => void;
+  onSetColumns: (data: any[], index: number) => void;
   prevSizes: any;
   setPrevSizes: Function;
   setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
   formOptions: FormOptions;
+  tableKey: string | number;
 };
 
 const CellContent = ({
@@ -32,8 +35,11 @@ const CellContent = ({
   cellChangeEvent,
   prevSizes,
   setPrevSizes,
+  tableKey,
   formOptions,
   setShowForm,
+  columnChangeEvent,
+  onSetColumns,
 }: Props) => {
   const [reresnder, setRerender] = React.useState(false);
   const [showOpenHandle, setShowOpenHandle] = React.useState<boolean>(false);
@@ -50,10 +56,6 @@ const CellContent = ({
   React.useEffect(() => {
     if (renderInputs && changeRef.current) {
       formatChangeRef(changeRef, column);
-    } else {
-      if (prevSizes.height) {
-        console.log("prevSizes.height", prevSizes.width);
-      }
     }
   }, [renderInputs]);
 
@@ -66,7 +68,7 @@ const CellContent = ({
       renderTimeout = setTimeout(() => {
         setRerender(!reresnder);
         renderTimeout = null;
-      }, 500);
+      }, 1000);
 
       if (val.textarea && changeRef?.current?.style) {
         resizeTimeout = setTimeout(() => {
@@ -99,6 +101,7 @@ const CellContent = ({
 
   return (
     <div
+      onClick={checkInputTypes}
       onMouseEnter={() => cellIndex === 1 && formOptions.showOpenFormHandle && setShowOpenHandle(true)}
       onMouseLeave={() => cellIndex === 1 && formOptions.showOpenFormHandle && setShowOpenHandle(false)}
     >
@@ -111,7 +114,7 @@ const CellContent = ({
       {(!column.type || !renderInputs) && column.type !== "select" && (
         <Cell
           prevSizes={prevSizes}
-          onClick={checkInputTypes}
+          onClick={() => {}}
           ref={valRef}
           row={row}
           column={column}
@@ -126,7 +129,17 @@ const CellContent = ({
         <>
           <input
             onChange={(e) =>
-              onCellChange({ value: e.target.value, event: e, prevValue: row[column.key], row, rowIndex, cellIndex, cellKey: column.key, text: true })
+              onCellChange({
+                value: e.target.value,
+                event: e,
+                prevValue: row[column.key],
+                row,
+                rowIndex,
+                cellIndex,
+                cellKey: column.key,
+                text: true,
+                tableKey,
+              })
             }
             className="combo-table-input"
             style={maxLengthError || minLengthError ? { borderBottom: "2px solid red", color: "red" } : {}}
@@ -163,6 +176,7 @@ const CellContent = ({
                 cellIndex,
                 cellKey: column.key,
                 text: true,
+                tableKey,
                 textarea: true,
               })
             }
@@ -185,8 +199,22 @@ const CellContent = ({
             options={column.options}
             multiple={column.multiple ? true : false}
             onChange={(val: any, option: any, e: React.MouseEvent, multiple: boolean | undefined) =>
-              onCellChange({ value: val, option, event: e, prevValue: row[column.key], row, rowIndex, cellIndex, cellKey: column.key, multiple })
+              onCellChange({
+                value: val,
+                option,
+                event: e,
+                prevValue: row[column.key],
+                row,
+                rowIndex,
+                cellIndex,
+                cellKey: column.key,
+                multiple,
+                tableKey,
+              })
             }
+            onColumnChange={(options: any[], prevOptions: any[], value: any, event: React.MouseEvent) => {
+              columnChangeEvent({ type: "options", value, prevOptions, options, event, tableKey, columnKey: column.key, columnIndex: cellIndex });
+            }}
             value={row[column.key]}
             columnKey={column.key}
             title={column.label}
