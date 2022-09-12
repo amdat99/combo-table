@@ -45,6 +45,7 @@ const ComboTable = (props: Props) => {
   const [selectedCellRowIds, setSelectedCellRowIds] = useState<any>([]);
   const [selectedRowIds, setSelectedRowIds] = useState<any>([]);
   const [dropdownData, setDropdownData] = useState<any>({});
+  const [tempDisableDropdownClose, setTempDisableDropdownClose] = useState(false);
   const [currentTableKey, setCurrentTableKey] = useState("");
   const value = React.useMemo(() => ({ dropdownData, setDropdownData, optionsMap }), [dropdownData, optionsMap]);
 
@@ -53,7 +54,7 @@ const ComboTable = (props: Props) => {
   //Hook to detect click outside of the sleect dropdown
   const { selectionOptions, loading, customLoaderComponent, maxHeight, maxWidth, formOptions, tableData } = props;
 
-  useOnClickOutside(selectRef, () => setDropdownData({}));
+  useOnClickOutside(selectRef, () => setDropdownData({}), tempDisableDropdownClose);
 
   //Hook to detect click outside of the form component
   useOnClickOutside(formRef, () => (formOptions ? formOptions.setShowForm(false) : setShowForm(false)));
@@ -107,7 +108,15 @@ const ComboTable = (props: Props) => {
   const showFormFlag = formOptions ? formOptions.showForm : showForm;
   return (
     <>
-      {dropdownData?.options && <Dropdown dropdownData={dropdownData} optionsMap={optionsMap} selectRef={selectRef} setOptionsMap={setOptionsMap} />}
+      {dropdownData?.options && (
+        <Dropdown
+          dropdownData={dropdownData}
+          optionsMap={optionsMap}
+          selectRef={selectRef}
+          setOptionsMap={setOptionsMap}
+          setTempDisableDropdownClose={setTempDisableDropdownClose}
+        />
+      )}
       <DropDownContext.Provider value={value}>
         {showFormFlag && <Form formRef={formRef} />}
         <div className="combo-table-table-wrapper" style={{ height: maxHeight || "100%", maxWidth: maxWidth || "100%" }}>

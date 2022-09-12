@@ -18,9 +18,10 @@ type Props = {
   selectRef: React.RefObject<HTMLDivElement>;
   optionsMap: any;
   setOptionsMap: React.Dispatch<any>;
+  setTempDisableDropdownClose: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function Dropdown({ dropdownData, selectRef, optionsMap, setOptionsMap }: Props) {
+function Dropdown({ dropdownData, selectRef, optionsMap, setOptionsMap, setTempDisableDropdownClose }: Props) {
   const { options, title, dropDownPosition, multiple, value, columnKey } = dropdownData;
   const [currentValue, setCurrentValue] = React.useState<any>([]);
   const [searchValue, setSearchValue] = React.useState<string>("");
@@ -128,6 +129,7 @@ function Dropdown({ dropdownData, selectRef, optionsMap, setOptionsMap }: Props)
               onClick={(e) => {
                 e.stopPropagation();
                 setMenuTarget(e);
+                setTempDisableDropdownClose(true);
               }}
             />
           </div>
@@ -141,7 +143,7 @@ function Dropdown({ dropdownData, selectRef, optionsMap, setOptionsMap }: Props)
           </div>
         )}
       </div>
-      <MenuDropdown open={menuTarget !== null} target={menuTarget}>
+      <MenuDropdown setTarget={setMenuTarget} open={menuTarget !== null} target={menuTarget} onCloseAction={() => setTempDisableDropdownClose(false)}>
         <span>test</span>
       </MenuDropdown>
     </>
