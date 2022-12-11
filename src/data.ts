@@ -35605,8 +35605,8 @@ const posts =[
 ]
 
 const selectFields = [
-        { label: "Option1", value: "Option1", color: "blue" },
-        { label: "Option2", value: "Option2", color: "pink" },
+        { label: "Option1", value: "Option1", color: "purple" },
+        { label: "Option2", value: "Option2", color: "green" },
       ];
 
 export const data = {
@@ -35614,3 +35614,4 @@ export const data = {
     posts,
     selectFields
 }
+

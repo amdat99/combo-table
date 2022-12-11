@@ -1,0 +1,79 @@
+.combo-grid-dropdown {
+  position: fixed !important;
+  z-index: 998;
+  animation: combo-grid-fadeIn 0.14s ease-in-out;
+  width: fit-content;
+  min-width: 250px;
+  height: fit-content;
+  background: var(--combo-grid-isomorphic-background);
+  box-shadow: 0px 5px 10px var(--combo-grid-shadow);
+  backdrop-filter: blur(100px);
+  border-radius: var(--combo-grid-base-border-radius);
+  padding: 3px;
+  vertical-align: top;
+  overflow-y: auto;
+}
+
+.combo-grid-select-background {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 995; /* semi-transparent black  */
+  background-color: rgba(0, 0, 0, 0.014);
+}
+
+.combo-grid-menu-background {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  z-index: 999;
+}
+.combo-grid-select-label-wrapper {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.combo-grid-select-label {
+  color: white;
+  font-weight: 400;
+  border-radius: var(--combo-grid-base-border-radius);
+  padding: 2px;
+  margin: 1px;
+  box-shadow: 1px 1px 1px 0px var(--combo-grid-shadow);
+  font-size: 12.5px;
+  width: fit-content;
+  border: 1px solid var(--combo-grid-secondary);
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.combo-grid-select-label:hover {
+  opacity: 1;
+}
+
+.combo-grid-select-create-wrapper {
+  display: flex;
+  flex-direction: row;
+  font: size 13.5px;
+  margin: 2px;
+  cursor: pointer;
+}
+.combo-grid-select-create-wrapper:hover {
+  background-color: var(--combo-grid-secondary);
+}
+
+.combo-grid-options {
+  padding: 2px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.combo-grid-options:hover {
+  background-color: var(--combo-grid-background-hover) !important;
+}

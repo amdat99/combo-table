@@ -21,11 +21,10 @@ const fetchData = async (url: string | string[], cb: Function) => {
   });
   setTimeout(() => {
     cb(response);
-  }, 300);
+  }, 180);
 };
 
 const setData = (data: any, key: string | number) => {
-  console.log("setData", data, key);
   localStorage.setItem(key.toString(), JSON.stringify(data));
 };
 

@@ -1,15 +1,22 @@
 import React from "react";
+
 import "./App.css";
-import ComboTable, { Column, CellChangeEvent, Transformer, SelectionData, ColumnChangeEvent } from "./combo-table";
+import ComboGrid, { Column, CellChangeEvent, Transformer, SelectionData, ColumnChangeEvent, PaginationOptions, TableData } from "./combo-grid";
 import requestsService from "./requests.service";
 
 function App() {
   const [data, setData] = React.useState<any>({ photos: [], posts: [] });
+  const dataRef = React.useRef<any>({ photos: [], posts: [] });
+  const [paginationOptions, setPaginationOptions] = React.useState<{ posts: PaginationOptions }>({
+    posts: { page: 1, limit: 25, type: "paging" },
+  });
+
   const [loading, setLoading] = React.useState(false);
-  const [showForm, setShowForm] = React.useState(false);
+  const [showForm, setShowForm] = React.useState({ photos: false, posts: false });
   const [fields, setFields] = React.useState<any>({});
+
   const photoColumns: Column[] = [
-    { key: "checkbox", label: "", type: "checkbox-select" },
+    { key: "checkbox", label: "", type: "checkbox-select", maxWidth: 40, noReorderable: true },
     {
       key: "pic",
       label: "Profile pic",
@@ -17,7 +24,14 @@ function App() {
         return (
           <div>
             {data.row.id < 1000 ? (
-              <img alt="profile" width="22" height="22" style={{ borderRadius: "50%" }} src={`https://picsum.photos/id/${data.row.id}/200/300`} />
+              <img
+                alt="profile"
+                width={data?.inForm ? "50" : "22"}
+                height={data?.inForm ? "50" : "22"}
+                loading="lazy"
+                style={{ borderRadius: "50%", marginLeft: data.inForm ? "0" : "10px" }}
+                src={`https://picsum.photos/id/${data.row.id}/200/300`}
+              />
             ) : (
               <span>No image found</span>
             )}
@@ -28,17 +42,19 @@ function App() {
     {
       key: "id",
       label: "Id",
+      width: "20px",
+      ctxMenuOptions: ["copy"],
       styleTransformer: (data: Transformer) => ({
         color: data.cell === 2 ? "red" : "black",
       }),
     },
-    { key: "title", label: "Title", minLength: 2, maxLength: 200, type: "input", columnStyle: { maxWidth: "200px" } },
-    { key: "url", label: "Url", minLength: 2, maxLength: 250, type: "input", subType: "url" },
+    { key: "index", label: "Index", cellTransformer: (data: Transformer) => data.rowIndex },
+    { key: "title", label: "Title", required: true, maxLength: 200, type: "input", ctxMenuOptions: ["copy"], isFormTitle: true, width: "300px" },
+    { key: "url", label: "Url", minLength: 2, maxLength: 250, type: "quill" },
     {
       key: "select",
       label: "select",
-      columnStyle: { width: "20%" },
-      type: "select",
+      type: "combo-select",
       options: fields.selectFields || [],
       multiple: true,
     },
@@ -47,7 +63,7 @@ function App() {
       key: "date",
       label: "Date",
       type: "date",
-      columnStyle: { minWidth: "200px" },
+      textTransformer: (data: Transformer) => new Date(data.cell).toLocaleDateString(),
       dateType: "date",
     },
   ];
@@ -56,15 +72,17 @@ function App() {
     { key: "checkbox", label: "", type: "checkbox-select" },
     { key: "id", label: "Id" },
     { key: "userId", label: "User Id" },
-    { key: "title", label: "Title", minLength: 2, maxLength: 150, type: "input" },
-    { key: "body", label: "Body", minLength: 2, maxLength: 500, type: "input", columnStyle: { maxWidth: "200px" } },
+    { key: "title", label: "Title", minLength: 2, width: "120px", maxLength: 150, type: "input" },
+    { key: "body", label: "Body", width: "500px", minLength: 2, type: "input" },
   ];
-
-  let timeout: any = null;
 
   React.useEffect(() => {
     fetchData();
     fetchFields();
+    window.addEventListener("click", (event) => {
+      console.log("click", dataRef.current.photos[0]);
+      requestsService.setData(dataRef.current.photos, "photos");
+    });
   }, []);
 
   const fetchData = async () => {
@@ -73,33 +91,29 @@ function App() {
     const cb = (res: { photos: any[]; posts: any[] }) => {
       setLoading(false);
       setData(res);
+      dataRef.current = res;
     };
-
     requestsService.fetchData(["photos", "posts"], cb);
   };
 
   const fetchFields = async () => {
-    const cb = (res: any) => {
-      setFields(res);
-    };
-
-    requestsService.fetchData(["selectFields"], cb);
+    requestsService.fetchData(["selectFields"], (res: any) => setFields(res));
   };
 
   const setCell = (changeData: CellChangeEvent) => {
-    if (changeData.hasError) {
-      return console.log(changeData);
-    }
     console.log(changeData);
-    data[changeData.tableKey][changeData.rowIndex][changeData.cellKey] = changeData.value;
+    const { tableKey, rowIndex, cellKey, hasError } = changeData;
 
-    timeout = setTimeout(() => {
-      requestsService.setData(data[changeData.tableKey], changeData.tableKey);
-      clearTimeout(timeout);
-    }, 5000);
+    if (hasError) {
+      return console.log("error", changeData);
+    } else {
+      console.log("success", changeData.value);
+    }
+    dataRef.current[tableKey][rowIndex][cellKey] = changeData.htmlValue || changeData.value;
   };
 
   const onColumnMutation = (data: ColumnChangeEvent) => {
+    console.log("onColumnMutation", data);
     if (data.type === "options" && data.tableKey === "photos") {
       photoColumns[data.columnIndex].options = data.options;
       requestsService.setData(data.options, "selectFields");
@@ -108,27 +122,87 @@ function App() {
 
   return (
     <>
-      <button onClick={() => requestsService.setData(data.photos, "photos")}>Save table</button>
       <div style={{ margin: "20px" }}>
-        <ComboTable
+        <ComboGrid
+          // renderOptions={{ firstRenderedTableKey: "photos" }}
           rowAction={(data) => console.log("row", data)}
+          paginationAction={(data) => console.log("pagination", data)}
           // cellAction={(data) => console.log("cellAction", data)}
-          cellChangeEvent={setCell}
+          cellChangeEvent={(data) => setCell(data)}
+          rowReorderEvent={(data) => {
+            console.log("rowReorderEvent", data);
+            requestsService.setData(data.newRows, data.tableKey);
+          }}
           columnChangeEvent={(data) => onColumnMutation(data)}
+          defaultTableData={{
+            virtualizationOptions: { renderedRows: window.innerHeight / 30 },
+            virtualScroll: true,
+            formOptions: {
+              toggleFormAction: (data: TableData) => setShowForm({ ...showForm, [data.key]: [!data.key] }),
+              showOpenFormHandle: true,
+              formView: "side",
+            },
+          }}
           tableData={[
-            { rows: data.photos, key: "photos", columns: photoColumns, startingType: "table" },
-            { rows: data.posts, key: "posts", columns: postColumns, startingType: "table" },
+            {
+              rows: data.photos,
+              key: "photos",
+              columns: photoColumns,
+              startingType: "table",
+              title: "Photos",
+              showTableForm: showForm?.photos,
+              // paginationOptions: paginationOptions.photos,
+
+              styleOptions: { saveColumnWidthsToLS: true },
+            },
+            {
+              rows: data.posts,
+              key: "posts",
+              columns: postColumns,
+              startingType: "table",
+              title: "Posts",
+              paginationOptions: paginationOptions.posts,
+              virtualScroll: false,
+              showTableForm: showForm?.posts,
+            },
+            {
+              rows: Array(100000).fill({
+                id: 2,
+                title: "title",
+                select: "YES",
+                text: "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.",
+              }),
+              columns: [
+                { key: "index", label: "index", cellTransformer: (data: { rowIndex: any }) => data.rowIndex },
+                { key: "id", label: "Id", width: "40px" },
+                { key: "title", label: "Title", type: "input" },
+                {
+                  key: "select",
+                  label: "Select",
+                  type: "select",
+                  width: "100px",
+                  options: [
+                    { label: "Select", value: "Select" },
+                    { label: "YES", value: "YES" },
+                    { label: "NO", value: "NO" },
+                  ],
+                },
+                { key: "text", label: "Text", type: "input", width: "70vw" },
+              ],
+              virtualizationOptions: { renderedRows: 20 },
+              title: "100,000 of Lorem Ipsum",
+              key: "100,000 of Lorem Ipsum",
+            },
           ]}
           loading={loading}
-          virtualizationOptions={{ enable: true, renderedRows: 100 }}
           selectionOptions={{
             rowActionSelects: true,
             cellActionSelects: false,
             getSelections: (data: SelectionData) => console.log("getSelections", data),
           }}
-          maxHeight={"95vh"}
-          formOptions={{ showForm: showForm, setShowForm: setShowForm, showOpenFormHandle: true, formView: "side" }}
-        ></ComboTable>
+          maxHeight="90vh"
+        ></ComboGrid>
+        {/* <button onClick={() => requestsService.setData(data.photos, "photos")}>Save table</button> */}
       </div>
     </>
   );

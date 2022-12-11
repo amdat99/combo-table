@@ -1,0 +1,162 @@
+.combo-grid-table-wrapper {
+  background: var(--combo-grid-background);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--combo-grid-border);
+
+  border-radius: var(--combo-grid-base-border-radius);
+  padding: 1px;
+  box-shadow: 0 0 2px 0 var(--combo-grid-shadow);
+  padding-top: 0px;
+  overflow-y: auto;
+}
+
+.combo-grid-table {
+  border-collapse: collapse;
+  font-size: var(--combo-grid-cell-font-size);
+}
+
+.combo-grid-body {
+}
+
+.combo-grid-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: var(--combo-grid-text);
+  padding-top: 5px;
+  text-align: center;
+}
+.combo-grid-row {
+  border-bottom: 1px solid var(--combo-grid-border);
+  font-weight: normal;
+  color: var(--combo-grid-text);
+  background-color: transparent;
+}
+
+.combo-grid-row:hover {
+  background-color: var(--combo-grid-background-hover);
+}
+
+.combo-grid-cell {
+  border: 1px solid var(--combo-grid-border);
+  border-right: none;
+  text-align: left;
+  padding: var(--combo-grid-cell-padding);
+  font-size: var(--combo-grid-cell-font-size);
+}
+
+.combo-grid-table-check {
+  opacity: 0.5;
+  cursor: pointer;
+  position: relative;
+  top: 9px;
+  left: 9px;
+  box-shadow: 0 0 10px 0 var(--combo-grid-shadow);
+  backdrop-filter: blur(100px);
+  width: 15px;
+  height: 15px;
+  text-align: center;
+}
+
+.combo-grid-footer {
+  position: sticky;
+  z-index: 950;
+  height: 20px;
+
+  left: -5px;
+  bottom: -3px;
+  color: var(--combo-grid-text);
+  /* border: 1px solid var(--combo-grid-border); */
+}
+
+.combo-grid-footer-right {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.combo-grid-row:hover .combo-grid-table-check {
+  opacity: 1;
+}
+
+.combo-grid-icon {
+  cursor: pointer;
+  position: relative;
+  top: 8px;
+  width: 18px;
+  height: 18px;
+  color: var(--combo-grid-text);
+  padding: 2px;
+  margin: 2px;
+}
+
+.combo-grid-icon:hover {
+  opacity: 0.5;
+}
+
+.combo-grid-open-handle {
+  cursor: pointer;
+  position: absolute;
+  left: 70px;
+  width: 50px;
+
+  height: 20px;
+  border: 1px solid var(--combo-grid-border);
+  border-radius: var(--combo-grid-base-border-radius);
+  background-color: var(--combo-grid-isomrphic-background);
+  backdrop-filter: blur(100px);
+  box-shadow: var(--combo-grid-shadow);
+  color: var(--combo-grid-primary);
+  font-size: 12px;
+  text-align: center;
+  line-height: 20px;
+  z-index: 1000;
+  animation: combo-grid-growIn 0.14s ease-in;
+}
+
+.combo-grid-open-handle:hover {
+  background-color: var(--combo-grid-background-hover);
+}
+
+.combo-grid-loader {
+  height: 30px;
+  width: 9px;
+  border-radius: 8px;
+  position: absolute;
+  color: var(--combo-grid-primary);
+  background: var(--combo-grid-primary);
+  left: 50%;
+  top: 50%;
+  z-index: 1000;
+  animation: comboht 0.5s ease-in infinite alternate;
+  box-shadow: 15px 0 0 -1px, -15px 0 0 -1px, 30px 0 0 -2px, -30px 0 0 -2px, 45px 0 0 -3px, -45px 0 0 -3px;
+}
+
+.combo-grid__dragging {
+  position: absolute;
+  width: 100%;
+  top: 0%;
+  width: 100vw;
+  height: 2px;
+  background-color: var(--combo-grid-primary);
+}
+
+.combo-grid__dragging .combo-grid-table-wrapper {
+  border: 1px solid var(--combo-grid-primary);
+}
+
+@keyframes comboht {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    height: 0px;
+  }
+}
+
+.resize-handle:hover {
+  border-color: #ccc;
+}
+
+.resize-handle.active {
+  border-color: #517ea5;
+}

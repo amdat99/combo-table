@@ -1,0 +1,30 @@
+.combo-grid-board-list {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+
+  min-width: 150px;
+  color: var(--combo-grid-text);
+  margin: 5px;
+}
+
+.combo-grid-list-title {
+  background-color: var(--combo-grid-background);
+  border-radius: var(--combo-grid-base-border-radius);
+  /* box-shadow: 0 0 10px 0 var(--combo-grid-shadow); */
+  padding: 3px;
+  width: fit-content;
+  font-size: 14px;
+  border: 1px solid var(--combo-grid-border);
+}
+
+.combo-grid-board-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 4px;
+  border-radius: var(--combo-grid-base-border-radius);
+  background-color: var(--combo-grid-background);
+  border: 1px solid var(--combo-grid-border);
+  margin: 5px;
+}

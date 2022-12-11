@@ -1,0 +1,80 @@
+.combo-grid-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background-color: transparent;
+
+  background-color: transparent;
+  font-family: inherit;
+}
+
+.combo-grid-cell-content {
+  white-space: wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  margin: none;
+  cursor: text;
+  text-overflow: ellipsis;
+}
+
+.combo-grid-cell-content p {
+  margin: 0px;
+  padding: 0px;
+}
+
+.combo-grid-textarea {
+  min-width: 100%;
+  outline: none;
+  height: fit-content;
+  background-color: transparent;
+  border: none;
+  margin: 0px;
+  resize: none;
+  white-space: pre-wrap;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.combo-grid-textarea:focus {
+  border-bottom: 2px solid var(--combo-grid-primary);
+  animation-name: combo-grid-bottom-border;
+  animation-timing-function: ease-in;
+  animation-duration: 0.12s;
+  position: relative;
+  right: 1.5px;
+}
+
+.combo-grid-input:focus {
+  border-bottom: 2px solid var(--combo-grid-primary);
+  animation-name: combo-grid-bottom-border;
+  animation-timing-function: ease-in;
+  animation-duration: 0.12s;
+}
+
+.combo-grid-select {
+  width: 100%;
+  height: 100%;
+  border: none;
+  min-width: none;
+  outline: none;
+  background-color: transparent;
+  font-size: 14px;
+  background-color: transparent;
+}
+
+.combo-grid-validation-box {
+  font-size: 12px;
+  border-radius: 4px;
+  backdrop-filter: blur(100px);
+  box-shadow: blur(10px) 0px 0px 10px var(--var--combo-grid-shadow);
+  color: red;
+  animation: combo-grid-fadeIn 0.15s ease-in;
+}
+
+.combo-grid-hide-resize-handle ::-webkit-resizer {
+  display: none;
+}

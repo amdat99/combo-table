@@ -1,0 +1,19 @@
+.combo-grid-form-wrapper-side {
+  background: var(--combo-grid-background);
+  box-shadow: blur(10px) 0px 0px 10px var(--combo-grid-shadow);
+  border: 1px solid var(--combo-grid-border);
+  border-radius: var(--combo-grid-base-border-radius);
+  padding: 3px;
+  box-shadow: 0 0 10px 0 var(--combo-grid-shadow);
+  -webkit-box-shadow: 0 0 10px 0 var(--combo-grid-shadow);
+  position: absolute;
+  min-width: 1000px;
+  max-width: 1000px;
+  height: 100vh;
+  z-index: 100;
+  top: 0;
+  right: 0;
+  font-size: var(--combo-grid-cell-font-size);
+  color: var(--combo-grid-text);
+  animation: combo-grid-fadeIn 0.3s ease-out;
+}

@@ -1,0 +1,73 @@
+.combo-grid-flex-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+.justify-between {
+  justify-content: space-between;
+  display: flex;
+}
+
+.justify-center {
+  justify-content: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+}
+
+.text-color {
+  color: var(--text-color);
+  font-size: var(--combo-grid-cell-font-size);
+}
+
+.primary-color {
+  color: var(--primary-color);
+}
+
+.secondary-color {
+  color: var(--secondary-color);
+}
+
+.combo-grid-border-bottom {
+  border-bottom: 1px solid var(--combo-grid-border);
+}
+
+.combo-grid-hide-scrollbar::-webkit-scrollbar {
+  width: 0px;
+}
+
+.combo-grid-shadow {
+  box-shadow: 0 0 10px 0 var(--combo-grid-shadow);
+}
+
+.combo-grid-button {
+  vertical-align: middle;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  margin: 2px;
+  padding: 3px;
+  border-radius: var(--combo-grid-base-border-radius);
+  position: relative;
+  bottom: 2px;
+  background-color: var(--primary-color);
+  backdrop-filter: blur(100px);
+  color: var(--combo-grid-text);
+  border: 1px solid var(--combo-grid-border);
+}
+
+.combo-grid-button:hover {
+  color: var(--combo-grid-primary);
+}
+
+.combo-grid-fade-in {
+  animation: fade-in 0.5s ease-in-out;
+}

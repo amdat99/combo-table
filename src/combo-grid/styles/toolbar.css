@@ -1,0 +1,110 @@
+.combo-grid-toolbar {
+  /* background-color: var(--combo-grid-secondary); */
+  backdrop-filter: blur(100px);
+  /* box-shadow: 0 0 10px 0 var(--combo-grid-shadow); */
+  opacity: 0.98;
+  display: flex;
+  position: relative;
+  z-index: 250;
+  top: 0px;
+  z-index: 0;
+  margin-bottom: 0px;
+  border-radius: var(--combo-grid-base-border-radius);
+  height: 32px;
+  justify-content: space-between;
+}
+
+.combo-grid-search-filter {
+  border: 2px solid var(--combo-grid-border);
+  border-radius: var(--combo-grid-base-border-radius);
+  padding: 2px;
+  padding-left: 10px;
+}
+
+.combo-grid-search-filter:hover {
+  backdrop-filter: blur(100px);
+}
+
+.combo-grid-search-filter:focus {
+  outline: none;
+  border: 1px solid var(--combo-grid-primary);
+  width: 250px;
+  background: var(--combo-grid-background);
+  animation-name: stretchLeft;
+  animation-timing-function: ease-in;
+  animation-duration: 0.15s;
+}
+
+.combo-grid-header {
+  position: sticky;
+  z-index: 250;
+  vertical-align: middle;
+  text-align: left;
+
+  background: var(--combo-grid-background);
+  color: var(--combo-grid-text);
+  backdrop-filter: blur(100px);
+  border-radius: var(--combo-grid-base-border-radius);
+  border-bottom: 1.5px solid var(--combo-grid-border);
+  border-top: 1px solid var(--combo-grid-border);
+  top: 0px;
+  box-shadow: blur(10px) 0px 0px 10px var(--combo-grid-shadow);
+  resize: horizontal;
+  overflow: auto;
+  height: 12px;
+  margin: 0;
+  z-index: 999;
+  min-width: 70px;
+}
+
+.combo-grid-header th {
+  font-weight: 500;
+  text-align: left;
+  padding-left: 5px;
+  margin: 20px;
+  cursor: pointer;
+}
+
+.combo-grid-header :hover {
+  opacity: 0.8;
+}
+
+.combo-grid-resize-handle {
+  width: 5px;
+  margin: 0;
+  border-left: 1px solid var(--combo-grid-border);
+  color: transparent;
+  cursor: pointer !important;
+  position: relative;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none;
+  left: 6.5px;
+}
+
+.combo-grid-resize-handle:hover {
+  border-left: 3px solid var(--combo-grid-primary);
+  cursor: col-resize !important;
+  opacity: 1 !important;
+}
+
+.combo-grid-table-tab {
+  vertical-align: middle;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  margin: 2px;
+  padding: 3px;
+  border-radius: var(--combo-grid-base-border-radius);
+  position: relative;
+  bottom: 2px;
+  color: var(--combo-grid-text);
+  border: 1px solid var(--combo-grid-border);
+}
+
+.combo-grid-table-tab:hover {
+  color: var(--combo-grid-primary);
+}
